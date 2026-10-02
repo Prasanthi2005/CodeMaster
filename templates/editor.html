@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeMaster Compiler</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='editor.css') }}">
+</head>
+
+<body>
+
+    <div class="navbar">
+
+        <div class="logo">
+            💻 CodeMaster Compiler
+        </div>
+
+        <div class="controls">
+
+            <select id="language">
+
+            <option value="python">Python</option>
+            <option value="c">C</option>
+            <option value="java">Java</option>
+            <option value="cpp">C++</option>
+
+        </select>
+
+            <button id="runBtn">
+            ▶ Run Code
+        </button>
+
+        </div>
+
+    </div>
+    <div class="container">
+
+        <div id="editor"></div>
+
+        <div class="right-panel">
+
+            <div class="panel">
+
+                <h3>Custom Input</h3>
+
+                <textarea id="input" placeholder="Enter input here..."></textarea>
+
+            </div>
+
+            <div class="panel">
+
+                <h3>Output</h3>
+
+                <pre id="output">
+Welcome to CodeMaster Compiler
+            </pre>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="{{ url_for('static', filename='editor.js') }}"></script>
+
+</body>
+
+</html>

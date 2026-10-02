@@ -1,0 +1,498 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Poppins", Arial, sans-serif;
+    min-height: 100vh;
+    background: #f4f7fb;
+    color: #1f2937;
+}
+
+
+/* =========================================
+   MAIN CONTAINER
+========================================= */
+
+.solve-container {
+    width: 95%;
+    max-width: 1450px;
+    margin: 30px auto;
+    display: grid;
+    grid-template-columns: 45% 55%;
+    gap: 25px;
+}
+
+
+/* =========================================
+   PROBLEM PANEL
+========================================= */
+
+.problem-panel {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    min-height: 650px;
+}
+
+
+/* =========================================
+   BACK BUTTON
+========================================= */
+
+.back-btn {
+    display: inline-block;
+    text-decoration: none;
+    color: #2858c7;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 25px;
+    transition: 0.3s;
+}
+
+.back-btn:hover {
+    color: #163fa3;
+    transform: translateX(-3px);
+}
+
+
+/* =========================================
+   TITLE
+========================================= */
+
+.problem-title {
+    font-size: 30px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 15px;
+}
+
+
+/* =========================================
+   BADGES
+========================================= */
+
+.badges {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.badges span {
+    display: inline-block;
+    padding: 6px 13px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+/* Difficulty */
+
+.difficulty.easy {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.difficulty.medium {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.difficulty.hard {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+
+/* Category */
+
+.category {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+
+/* =========================================
+   PROBLEM HEADINGS
+========================================= */
+
+.problem-panel h2 {
+    font-size: 20px;
+    color: #111827;
+    margin-top: 25px;
+    margin-bottom: 12px;
+}
+
+
+/* =========================================
+   DESCRIPTION
+========================================= */
+
+.problem-description {
+    font-size: 15px;
+    line-height: 1.8;
+    color: #4b5563;
+}
+
+
+/* =========================================
+   EXAMPLE
+========================================= */
+
+.example {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 18px;
+    margin-top: 10px;
+}
+
+.example-section {
+    margin-bottom: 15px;
+}
+
+.example-section:last-child {
+    margin-bottom: 0;
+}
+
+.example strong {
+    display: block;
+    font-size: 13px;
+    color: #374151;
+    margin-bottom: 7px;
+}
+
+.example pre {
+    background: #111827;
+    color: #e5e7eb;
+    padding: 14px;
+    border-radius: 7px;
+    overflow-x: auto;
+    font-family: Consolas, monospace;
+    font-size: 13px;
+}
+
+
+/* =========================================
+   CODE PANEL
+========================================= */
+
+.code-panel {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    min-height: 650px;
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* =========================================
+   CODE HEADER
+========================================= */
+
+.code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.code-header h2 {
+    font-size: 20px;
+    color: #111827;
+}
+
+
+/* =========================================
+   LANGUAGE SELECT
+========================================= */
+
+.languageSelect {
+    min-width: 110px;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 7px;
+    background: #e0e7ff;
+    color: #3730a3;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+}
+
+.languageSelect:hover {
+    background: #c7d2fe;
+}
+
+.languageSelect:focus {
+    box-shadow: 0 0 0 3px rgba(55, 48, 163, 0.15);
+}
+
+
+/* =========================================
+   CODE EDITOR
+========================================= */
+
+#codeEditor {
+    width: 100%;
+    min-height: 470px;
+    resize: vertical;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    background: #111827;
+    color: #f9fafb;
+    padding: 20px;
+    outline: none;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 14px;
+    line-height: 1.7;
+    tab-size: 4;
+}
+
+#codeEditor:focus {
+    border-color: #2858c7;
+    box-shadow: 0 0 0 3px rgba(40, 88, 199, 0.12);
+}
+
+#codeEditor::placeholder {
+    color: #9ca3af;
+}
+
+
+/* =========================================
+   BUTTONS
+========================================= */
+
+.editor-controls {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+
+/* Clear */
+
+.clear-btn {
+    padding: 11px 22px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    color: #374151;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.clear-btn:hover {
+    background: #f3f4f6;
+}
+
+
+/* Submit */
+
+.submit-btn {
+    padding: 11px 22px;
+    border: none;
+    background: #2858c7;
+    color: #ffffff;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.submit-btn:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+.submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+
+/* =========================================
+   RESULT MESSAGE
+========================================= */
+
+.result {
+    display: none;
+    margin-top: 15px;
+    padding: 13px 15px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.result.correct {
+    display: block;
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #86efac;
+}
+
+.result.wrong {
+    display: block;
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
+.result.info {
+    display: block;
+    background: #dbeafe;
+    color: #1e40af;
+    border: 1px solid #93c5fd;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 1000px) {
+    .solve-container {
+        grid-template-columns: 1fr;
+    }
+    .problem-panel,
+    .code-panel {
+        min-height: auto;
+    }
+    #codeEditor {
+        min-height: 400px;
+    }
+}
+
+@media (max-width: 600px) {
+    .solve-container {
+        width: 94%;
+        margin: 15px auto;
+        gap: 15px;
+    }
+    .problem-panel,
+    .code-panel {
+        padding: 20px;
+        border-radius: 12px;
+    }
+    .problem-title {
+        font-size: 24px;
+    }
+    .code-header {
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .code-header h2 {
+        font-size: 18px;
+    }
+    #codeEditor {
+        min-height: 350px;
+        font-size: 13px;
+    }
+    .editor-controls {
+        flex-direction: column;
+    }
+    .clear-btn,
+    .submit-btn {
+        width: 100%;
+    }
+    .languageSelect {
+        min-width: 95px;
+    }
+}
+
+
+/* ==========================================
+   RESULT MESSAGE
+========================================== */
+
+.result {
+    margin-top: 20px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    font-size: 15px;
+    line-height: 1.6;
+    display: none;
+}
+
+.result:not(:empty) {
+    display: block;
+}
+
+
+/* INFO */
+
+.result.info {
+    background: #eef4ff;
+    color: #2454c6;
+    border: 1px solid #c9d9ff;
+}
+
+
+/* CORRECT */
+
+.result.correct {
+    background: #e8f9ee;
+    color: #16803c;
+    border: 1px solid #9be2b5;
+}
+
+
+/* WRONG */
+
+.result.wrong {
+    background: #fff0f0;
+    color: #d62828;
+    border: 1px solid #ffb4b4;
+}
+
+
+/* ERROR */
+
+.result.error {
+    background: #fff0f0;
+    color: #b42318;
+    border: 1px solid #ffb4b4;
+}
+
+
+/* OUTPUT */
+
+.result pre {
+    margin-top: 8px;
+    padding: 12px;
+    background: #111827;
+    color: #ffffff;
+    border-radius: 8px;
+    overflow-x: auto;
+    white-space: pre-wrap;
+}
+
+
+/* SOLVED BUTTON */
+
+.submit-btn.solved {
+    background: #16a34a !important;
+    color: white !important;
+    cursor: default;
+}
+
+
+/* DISABLED */
+
+.submit-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}

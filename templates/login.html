@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeMaster | Login</title>
+
+    <meta name="description" content="Login to CodeMaster and continue your coding journey.">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+
+<body>
+
+
+    <div class="login-page">
+
+        <!-- Decorative background -->
+        <div class="bg-orb orb-one"></div>
+        <div class="bg-orb orb-two"></div>
+        <div class="bg-grid"></div>
+
+        <main class="login-card">
+
+            <!-- ==================================================
+             LEFT SIDE
+        =================================================== -->
+
+            <section class="login-left">
+
+                <div class="left-glow"></div>
+
+                <!-- BRAND -->
+                <div class="brand">
+
+                    <div class="brand-icon">
+                        <i class="fa-solid fa-code"></i>
+                    </div>
+
+                    <div class="brand-text">
+                        <h2>
+                            Code<span>Master</span>
+                        </h2>
+
+                        <small>
+                        Learn&nbsp; · &nbsp;Code&nbsp; · &nbsp;Compete&nbsp; · &nbsp;Grow
+                    </small>
+                    </div>
+
+                </div>
+
+
+                <!-- TOP RIGHT MINI TEXT -->
+
+                <div class="build-badge">
+
+                    <i class="fa-solid fa-bolt"></i>
+
+                    <div>
+                        <span>Code Today</span>
+                        <span>Build Tomorrow</span>
+                    </div>
+
+                </div>
+
+
+                <!-- WELCOME -->
+
+                <div class="welcome-content">
+
+                    <h1>
+                        Welcome
+                        <span>Back!</span>
+                    </h1>
+
+                    <p>
+                        Continue your coding journey with CodeMaster, solve coding challenges, join contests, improve your skills, and get AI-powered code explanations.
+                    </p>
+
+                </div>
+
+
+                <!-- FEATURE MINI CARDS -->
+
+                <div class="mini-features">
+
+                    <div class="mini-feature">
+
+                        <div class="mini-icon purple-icon">
+                            <i class="fa-solid fa-code"></i>
+                        </div>
+
+                        <div>
+                            <strong>Practice</strong>
+                            <small>Coding Problems</small>
+                        </div>
+
+                    </div>
+
+
+                    <div class="mini-divider"></div>
+
+
+                    <div class="mini-feature">
+
+                        <div class="mini-icon orange-icon">
+                            <i class="fa-solid fa-trophy"></i>
+                        </div>
+
+                        <div>
+                            <strong>Compete</strong>
+                            <small>Live Contests</small>
+                        </div>
+
+                    </div>
+
+
+                    <div class="mini-divider"></div>
+
+
+                    <div class="mini-feature">
+
+                        <div class="mini-icon green-icon">
+                            <i class="fa-solid fa-chart-column"></i>
+                        </div>
+
+                        <div>
+                            <strong>Grow</strong>
+                            <small>Track Progress</small>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- CODING IMAGE -->
+
+                <div class="coding-visual">
+
+                    <div class="visual-glow"></div>
+
+                    <img src="{{ url_for('static', filename='images/codemaster.png') }}" alt="CodeMaster coding workspace">
+
+                </div>
+
+
+                <!-- LEFT BOTTOM QUOTE -->
+
+                <div class="left-quote">
+                    <span>“</span> Better Code
+                    <b>•</b> Better Problem Solving
+                    <b>•</b> A Brighter Future
+                    <span>”</span>
+                </div>
+
+            </section>
+
+
+            <!-- ==================================================
+             RIGHT SIDE
+        =================================================== -->
+
+            <section class="login-right">
+
+                <div class="right-inner">
+
+                    <!-- LOGIN BRAND -->
+
+                    <div class="login-brand">
+
+                        <div class="login-brand-icon">
+                            <i class="fa-solid fa-code"></i>
+                        </div>
+
+                        <h2>
+                            Code<span>Master</span>
+                        </h2>
+
+                        <p>
+                            Login to your account
+                        </p>
+
+                    </div>
+
+
+                    <!-- FLASH MESSAGES -->
+
+                    {% with messages = get_flashed_messages(with_categories=true) %} {% if messages %}
+
+                    <div class="flash-wrapper">
+
+                        {% for category, message in messages %}
+
+                        <div class="flash-message {{ category }}" role="alert">
+
+                            {% if category == "error" %}
+
+                            <i class="fa-solid fa-circle-exclamation"></i> {% else %}
+
+                            <i class="fa-solid fa-circle-info"></i> {% endif %}
+
+                            <span>
+                            {{ message }}
+                        </span>
+
+                        </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                    {% endif %} {% endwith %}
+
+
+                    <!-- LOGIN FORM -->
+
+                    <form action="{{ url_for('login') }}" method="POST" class="login-form" id="loginForm" autocomplete="on">
+
+
+                        <!-- EMAIL -->
+
+                        <div class="input-group">
+
+                            <i class="fa-regular fa-envelope input-icon"></i>
+
+                            <input type="email" name="email" id="email" placeholder="Enter Email" autocomplete="email" required>
+
+                        </div>
+
+
+                        <!-- PASSWORD -->
+
+                        <div class="input-group">
+
+                            <i class="fa-solid fa-lock input-icon"></i>
+
+                            <input type="password" id="password" name="password" placeholder="Enter Password" autocomplete="current-password" required>
+
+
+                            <button type="button" id="showPassword" class="password-toggle" aria-label="Show password" title="Show password">
+
+                            <i class="fa-regular fa-eye"></i>
+
+                        </button>
+
+                        </div>
+
+
+                        <!-- OPTIONS -->
+
+                        <div class="login-options">
+
+                            <label class="remember-me">
+
+                            <input
+                                type="checkbox"
+                                name="remember"
+                                id="remember">
+
+                            <span class="custom-check">
+                                <i class="fa-solid fa-check"></i>
+                            </span>
+
+                            <span class="remember-text">
+                                Remember Me
+                            </span>
+
+                        </label>
+
+
+                            <a href="{{ url_for('forgot_password') }}" class="forgot-password">
+
+                            Forgot Password?
+
+                        </a>
+
+                        </div>
+
+
+                        <!-- LOGIN BUTTON -->
+
+                        <button type="submit" class="login-submit" id="loginButton">
+
+                        <span class="button-text">
+                            <i class="fa-solid fa-right-to-bracket"></i>
+                            Login
+                        </span>
+
+                        <span
+                            class="button-loader"
+                            aria-hidden="true">
+                        </span>
+
+                    </button>
+
+                    </form>
+
+
+                    <!-- DIVIDER -->
+
+                    <div class="or-divider">
+
+                        <span></span>
+
+                        <strong>OR</strong>
+
+                        <span></span>
+
+                    </div>
+
+
+                    <!-- GOOGLE LOGIN -->
+
+                    <a href="{{ url_for('google_login') }}" class="google-login-btn">
+
+                        <span class="google-svg">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            width="22"
+                            height="22"
+                            aria-hidden="true">
+
+                            <path
+                                fill="#4285F4"
+                                d="M21.35 12.27c0-.79-.07-1.55-.23-2.27H12v4.3h5.23a4.47 4.47 0 0 1-1.94 2.93v2.43h3.14c1.84-1.69 2.92-4.18 2.92-7.39z"/>
+
+                            <path
+                                fill="#34A853"
+                                d="M12 21.6c2.63 0 4.84-.87 6.45-2.34l-3.14-2.43c-.87.58-1.98.93-3.31.93-2.54 0-4.69-1.72-5.46-4.03H3.3v2.5A9.75 9.75 0 0 0 12 21.6z"/>
+
+                            <path
+                                fill="#FBBC05"
+                                d="M6.54 13.73A5.86 5.86 0 0 1 6.23 12c0-.6.1-1.18.31-1.73v-2.5H3.3A9.73 9.73 0 0 0 2.25 12c0 1.57.38 3.05 1.05 4.23l3.24-2.5z"/>
+
+                            <path
+                                fill="#EA4335"
+                                d="M12 6.24c1.43 0 2.72.49 3.73 1.46l2.8-2.8C16.84 3.34 14.63 2.4 12 2.4a9.75 9.75 0 0 0-8.7 5.37l3.24 2.5C6.31 7.96 8.46 6.24 12 6.24z"/>
+
+                        </svg>
+
+                    </span>
+
+                        <span>
+                        Login with Google
+                    </span>
+
+                    </a>
+
+
+                    <!-- REGISTER -->
+
+                    <p class="register-text">
+
+                        Don't have an account?
+
+                        <a href="{{ url_for('register') }}">
+                        Register
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+
+                    </p>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <!-- Existing Login JS -->
+
+    <scrip

@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeMaster | AI Powered Coding Platform</title>
+
+    <meta name="description" content="CodeMaster is an AI-powered online coding platform for coding practice, programming problems, contests, learning and developer growth.">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+</head>
+
+<body>
+
+
+    <!-- ================= NAVBAR ================= -->
+
+    <header class="main-header">
+
+        <nav class="navbar">
+
+            <!-- LOGO -->
+            <a href="{{ url_for('home') }}" class="logo">
+
+                <span class="logo-icon">
+                <i class="fa-solid fa-code"></i>
+            </span>
+
+                <span class="logo-text">
+                Code<span>Master</span>
+                </span>
+
+            </a>
+
+
+            <!-- DESKTOP NAVIGATION -->
+
+            <ul class="nav-links" id="navLinks">
+
+                <li>
+                    <a href="{{ url_for('home') }}">
+                    Home
+                </a>
+                </li>
+
+                <li>
+                    <a href="{{ url_for('home') }}#features">
+                    Features
+                </a>
+                </li>
+
+                <li>
+                    <a href="{{ url_for('home') }}#courses">
+                    Courses
+                </a>
+                </li>
+
+
+
+                <li>
+                    <a href="{{ url_for('home') }}#about">
+                    About
+                </a>
+                </li>
+
+                <li>
+                    <a href="{{ url_for('home') }}#contact">
+                    Contact
+                </a>
+                </li>
+
+            </ul>
+
+
+            <!-- DESKTOP BUTTONS -->
+
+            <div class="nav-actions">
+
+                <a href="{{ url_for('login') }}" class="login-btn">
+                Login
+            </a>
+
+                <a href="{{ url_for('register') }}" class="register-btn">
+                Register
+            </a>
+
+            </div>
+
+
+            <!-- MOBILE MENU BUTTON -->
+
+            <button class="mobile-menu-btn" id="mobileMenuBtn" type="button" aria-label="Open navigation menu" aria-expanded="false">
+
+            <i class="fa-solid fa-bars"></i>
+
+        </button>
+
+        </nav>
+
+    </header>
+
+
+    <!-- ================= HERO ================= -->
+
+    <main>
+
+        <section class="hero" id="home">
+
+            <div class="hero-content">
+
+                <div class="hero-badge">
+                    <i class="fa-solid fa-bolt"></i> AI Powered Coding Platform
+                </div>
+
+                <h1>
+                    Learn.
+                    <span>Code.</span> Compete.
+                    <br>
+                    <strong>Become a Better Developer.</strong>
+                </h1>
+
+                <p>
+                    Practice real programming problems, write and execute code, participate in coding contests, track your progress and build your developer skills with CodeMaster.
+                </p>
+
+                <div class="hero-buttons">
+
+                    <a href="{{ url_for('register') }}" class="primary-btn">
+                        <i class="fa-solid fa-rocket"></i> Start Coding
+                    </a>
+
+                    <a href="#features" class="secondary-btn">
+                        <i class="fa-solid fa-compass"></i> Explore Platform
+                    </a>
+
+                </div>
+
+
+                <div class="hero-stats">
+
+                    <div class="hero-stat">
+                        <strong>135+</strong>
+                        <span>Coding Problems</span>
+                    </div>
+
+                    <div class="hero-stat">
+                        <strong>3</strong>
+                        <span>Difficulty Levels</span>
+                    </div>
+
+                    <div class="hero-stat">
+                        <strong>5+</strong>
+                        <span>Programming Languages</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Hero visual -->
+
+            <div class="hero-visual">
+
+                <div class="floating-card card-one">
+
+                    <i class="fa-solid fa-circle-check"></i>
+
+                    <div>
+                        <strong>Problem Solved</strong>
+                        <small>Two Sum · Easy</small>
+                    </div>
+
+                </div>
+
+
+                <div class="code-window">
+
+                    <div class="window-header">
+
+                        <div class="window-dots">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+
+                        <div class="window-title">
+                            CodeMaster Editor
+                        </div>
+
+                        <div class="window-language">
+                            Python
+                        </div>
+
+                    </div>
+
+
+                    <div class="code-content">
+
+                        <div class="code-line">
+                            <span class="line-number">01</span>
+
+                            <span>
+                            <span class="code-keyword">def</span>
+                            <span class="code-function">two_sum</span> (nums, target):
+                            </span>
+                        </div>
+
+
+                        <div class="code-line">
+                            <span class="line-number">02</span>
+
+                            <span class="indent">
+                            seen = {}
+                        </span>
+                        </div>
+
+
+                        <div class="code-line">
+                            <span class="line-number">03</span>
+
+                            <span class="indent">
+
+                            <span class="code-keyword">for</span> i, num
+                            <span class="code-keyword">in</span> enumerate(nums):
+
+                            </span>
+                        </div>
+
+
+                        <div class="code-line">
+
+                            <span class="line-number">04</span>
+
+                            <span class="indent-2">
+                            complement = target - num
+                        </span>
+
+                        </div>
+
+
+                        <div class="code-line">
+
+                            <span class="line-number">05</span>
+
+                            <span class="indent-2">
+
+                            <span class="code-keyword">if</span> complement
+                            <span class="code-keyword">in</span> seen:
+
+                            </span>
+
+                        </div>
+
+
+                        <div class="code-line">
+
+                            <span class="line-number">06</span>
+
+                            <span class="indent-3">
+
+                            <span class="code-keyword">return</span> [seen[complement], i]
+
+                            </span>
+
+                        </div>
+
+
+                        <div class="code-line">
+
+                            <span class="line-number">07</span>
+
+                            <span class="indent-2">
+                            seen[num] = i
+                        </span>
+
+                        </div>
+
+
+                        <div class="code-line">
+
+                            <span class="line-number">08</span>
+
+                            <span class="code-comment">
+                            # Keep learning 🚀
+                        </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="editor-footer">
+
+                        <span>
+                        <i class="fa-solid fa-circle"></i>
+                        Ready
+                    </span>
+
+                        <span>
+                        Python 3
+                    </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="floating-card card-two">
+
+                    <div class="mini-icon">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+
+                    <div>
+                        <strong>Contest Live</strong>
+                        <small>Join the challenge</small>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= FEATURES ================= -->
+
+        <section class="features-section" id="features">
+
+            <div class="section-heading">
+
+                <span class="section-label">
+                <i class="fa-solid fa-sparkles"></i>
+                POWERFUL FEATURES
+            </span>
+
+                <h2>
+                    Everything You Need to
+                    <span>Level Up</span>
+                </h2>
+
+                <p>
+                    CodeMaster brings coding practice, execution, contests and progress tracking together in one powerful platform.
+                </p>
+
+            </div>
+
+
+            <div class="feature-container">
+
+
+                <!-- Editor -->
+
+                <article class="feature-box">
+
+                    <div class="feature-icon blue">
+                        <i class="fa-solid fa-laptop-code"></i>
+                    </div>
+
+                    <div class="feature-content">
+
+                        <h3>Online Code Editor</h3>
+
+                        <p>
+                            Write, test and execute your programs using a clean VS Code inspired editor.
+                        </p>
+
+                        <a href="" class="feature-link">
+                        Open Editor
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+
+                    </div>
+
+                </article>
+
+
+                <!-- Problems -->
+
+                <article class="feature-box">
+
+                    <div class="feature-icon purple">
+                        <i class="fa-solid fa-code"></i>
+                    </div>
+
+                    <div class="feature-content">
+
+                        <h3>Coding Problems</h3>
+
+                        <p>
+                            Solve Easy, Medium and Hard programming problems and improve your problem-solving skills.
+                        </p>
+
+                        <a href="" class="feature-link">
+                        Solve Problems
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+
+                    </div>
+
+                </article>
+
+
+                <!-- Contests -->
+
+                <article class="feature-box">
+
+                    <div class="feature-icon orange">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+
+                    <div class="feature-content">
+
+                        <h3>Live Contests</h3>
+
+                        <p>
+                            Participate in coding contests, solve problems against the clock and compete on the leaderboard.
+                        </p>
+
+                        <a href="" class="feature-link">
+                        View Contests
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+
+                    </div>
+
+                </article>
+
+
+                <!-- Leaderboard -->
+
+                <article class="feature-box">
+
+                    <div class="feature-icon green">
+                        <i class="fa-solid fa-ranking-star"></i>
+                    </div>
+
+                    <div class="feature-content">
+
+                        <h3>Leaderboard</h3>
+
+                        <p>
+                            Track your ranking and compare your coding progress with other developers.
+                        </p>
+
+                        <a href="" class="feature-link">
+                        View Leaderboard
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+
+                    </div>
+
+                </article>
+
+
+                <!-- Profile -->
+
+                <article class="feature-box">
+
+                    <div class="feature-icon pink">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+
+                    <div class="feature-content">
+
+                        <h3>Progress Tracking</h3>
+
+                        <p>
+                            Monitor solved problems, ratings, achievements and your overall coding journey.
+                        </p>
+
+                        <a href="" class="feature-link">
+                        View Profile
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+
+                    </div>
+
+                </article>
+
+
+                <!-- Certificate -->
+
+                <article class="feature-box">
+
+                    <div class="feature-icon cyan">
+                        <i class="fa-solid fa-certificate"></i>
+                    </div>
+
+                    <div class="feature-content">
+
+                        <h3>Certificates</h3>
+
+                        <p>
+                            Complete learning milestones and showcase your achievements with certificates.
+                        </p>
+
+                        <a href="" class="feature-link">
+                        View Certificates
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+
+                    </div>
+
+                </article>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= LEARNING PATHS ================= -->
+
+        <section class="courses-section" id="courses">
+
+            <div class="section-heading">
+
+                <span class="section-label">
+                LEARNING PATHS
+            </span>
+
+                <h2>
+                    Build Skills That
+                    <span>Actually Matter</span>
+                </h2>
+
+                <p>
+                    Practice the technologies and concepts required for real-world development.
+                </p>
+
+            </div>
+
+
+            <div class="course-container">
+
+
+                <article class="course-card">
+
+                    <div class="course-icon">
+                        <i class="fa-solid fa-diagram-project"></i>
+                    </div>
+
+                    <span class="course-level">
+                    CORE SKILLS
+                </span>
+
+                    <h3>
+                        Data Structures & Algorithms
+                    </h3>
+
+                    <p>
+                        Arrays, strings, linked lists, trees, graphs, searching, sorting and algorithms.
+                    </p>
+
+                    <div class="course-tags">
+                        <span>Arrays</span>
+                        <span>Trees</span>
+                        <span>Graphs</span>
+                    </div>
+
+                </article>
+
+
+                <article class="course-card">
+
+                    <div class="course-icon">
+                        <i class="fa-brands fa-python"></i>
+                    </div>
+
+                    <span class="course-level">
+                    PROGRAMMING
+                </span>
+
+                    <h3>
+                        Python Programming
+                    </h3>
+
+                    <p>
+                        Learn Python from fundamentals to advanced problem-solving and algorithms.
+                    </p>
+
+                    <div class="course-tags">
+                        <span>Python</span>
+                        <span>Logic</span>
+                        <span>Algorithms</span>
+                    </div>
+
+                </article>
+
+
+                <article class="course-card">
+
+                    <div class="course-icon">
+                        <i class="fa-solid fa-globe"></i>
+                    </div>
+
+                    <span class="course-level">
+                    DEVELOPMENT
+                </span>
+
+                    <h3>
+                        Web Development
+                    </h3>
+
+                    <p>
+                        Build modern web applications using HTML, CSS, JavaScript, Flask and React.
+                    </p>
+
+                    <div class="course-tags">
+                        <span>HTML</span>
+                        <span>CSS</span>
+                        <span>JavaScript</span>
+                    </div>
+
+                </article>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= CONTEST CTA ================= -->
+
+        <section class="contest-banner">
+
+            <div class="contest-banner-content">
+
+                <div class="contest-banner-icon">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+
+                <div>
+
+                    <span class="section-label">
+                    CODING CONTESTS
+                </span>
+
+                    <h2>
+                        Ready to Test Your Skills?
+                    </h2>
+
+                    <p>
+                        Join coding contests, solve challenging problems and climb the leaderboard.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <a href="" class="contest-btn">
+
+            Explore Contests
+
+            <i class="fa-solid fa-arrow-right"></i>
+
+        </a>
+
+        </section>
+
+
+        <!-- ================= LEADERBOARD ================= -->
+
+        <section class="leaderboard-section" id="leaderboard">
+
+            <div class="section-heading">
+
+                <span class="section-label">
+                <i class="fa-solid fa-ranking-star"></i>
+                COMMUNITY
+            </span>
+
+                <h2>
+                    Top <span>Coders</span>
+                </h2>
+
+                <p>
+                    Compete, solve more problems and improve your ranking.
+                </p>
+
+            </div>
+
+
+            <div class="leaderboard-wrapper">
+
+                <table class="leaderboard-table">
+
+                    <thead>
+
+                        <tr>
+                            <th>Rank</th>
+                            <th>Coder</th>
+                            <th>Score</th>
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        <tr>
+
+                            <td>
+                                <span class="rank-badge gold">
+                                1
+                            </span>
+                            </td>
+
+                            <td>
+
+                                <div class="coder-info">
+
+                                    <div class="coder-avatar">
+                                        P
+                                    </div>
+
+                                    <strong>
+                                    Prasanthi
+                                </strong>
+
+                                </div>
+
+                            </td>
+
+                            <td>
+                                <strong>
+                                9850
+                            </strong>
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                <span class="rank-badge silver">
+                                2
+                            </span>
+                            </td>
+
+                            <td>
+
+                                <div class="coder-info">
+
+                                    <div class="coder-avatar">
+                                        A
+                                    </div>
+
+                                    <strong>
+                                    Anjali
+                                </strong>
+
+                                </div>
+
+                            </td>
+
+                            <td>
+                                <strong>
+                                9500
+                            </strong>
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                <span class="rank-badge bronze">
+                                3
+                            </span>
+                            </td>
+
+                            <td>
+
+                                <div class="coder-info">
+
+                                    <div class="coder-avatar">
+                                        B
+                                    </div>
+
+                                    <strong>
+                                    Bhavani
+                                </strong>
+
+                                </div>
+
+                            </td>
+
+                            <td>
+                                <strong>
+                                9000
+                            </strong>
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+
+                <!-- FIXED: Opens full leaderboard page -->
+
+                <a href="" class="leaderboard-link">
+
+                View Full Leaderboard
+
+                <i class="fa-solid fa-arrow-right"></i>
+
+            </a>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= ABOUT ================= -->
+
+        <section class="about-section" id="about">
+
+            <div class="about-content">
+
+                <div class="about-text">
+
+                    <span class="section-label">
+                    ABOUT CODEMASTER
+                </span>
+
+                    <h2>
+                        Learn.
+                        <span>Code.</span> Compete. Grow.
+                    </h2>
+
+                    <p>
+                        CodeMaster is a modern online coding and programming platform designed to help students and developers improve their programming and problem-solving skills through hands-on practice.
+                    </p>
+
+                    <p>
+                        Instead of simply reading solutions, users can write their own programs, test them with different inputs, submit solutions, participate in contests and track their coding progress.
+                    </p>
+
+
+                    <div class="about-points">
+
+                        <div>
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span>Real programming practice</span>
+                        </div>
+
+                        <div>
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span>Easy, Medium and Hard problems</span>
+                        </div>
+
+                        <div>
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span>Live coding contests</span>
+                        </div>
+
+                        <div>
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span>Progress and leaderboard tracking</span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="about-card">
+
+                    <div class="about-card-header">
+
+                        <div class="about-logo">
+                            <i class="fa-solid fa-code"></i>
+                        </div>
+
+                        <div>
+                            <strong>CodeMaster</strong>
+                            <small>Developer Learning Platform</small>
+                        </div>
+
+                    </div>
+
+
+                    <div class="about-card-content">
+
+                        <div>
+                            <strong>135+</strong>
+                            <span>Problems</span>
+                        </div>
+
+                        <div>
+                            <strong>5+</strong>
+                            <span>Languages</span>
+                        </div>
+
+                        <div>
+                            <strong>24/7</strong>
+                            <span>Practice</span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= CONTACT ================= -->
+
+        <section class="contact-section" id="contact">
+
+            <div class="section-heading">
+
+                <span class="section-label">
+                GET IN TOUCH
+            </span>
+
+                <h2>
+                    Have a Question?
+                    <span>Let's Talk.</span>
+                </h2>
+
+                <p>
+                    Have feedback or suggestions for CodeMaster? Send us a message.
+                </p>
+
+            </div>
+
+
+            <div class="contact-wrapper">
+
+                <div class="contact-info">
+
+                    <div class="contact-item">
+
+                        <div class="contact-icon">
+                            <i class="fa-solid fa-code"></i>
+                        </div>
+
+                        <div>
+
+                            <h3>
+                                CodeMaster
+                            </h3>
+
+                            <p>
+                                Your coding practice companion.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="contact-item">
+
+                        <div class="contact-icon">
+                            <i class="fa-solid fa-graduation-cap"></i>
+                        </div>
+
+                        <div>
+
+                            <h3>
+                                Learn & Practice
+                            </h3>
+
+                            <p>
+                                Build strong programming fundamentals.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="contact-item">
+
+                        <div class="contact-icon">
+                            <i class="fa-solid fa-trophy"></i>
+                        </div>
+
+                        <div>
+
+                            <h3>
+                                Compete
+                            </h3>
+
+                            <p>
+                                Challenge yourself with coding contests.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <form class="contact-form">
+
+                    <div class="form-row">
+
+                        <input type="text" name="name" placeholder="Your Name" required>
+
+                        <input type="email" name="email" placeholder="Your Email" required>
+
+                    </div>
+
+
+                    <textarea name="message" placeholder="Write your message..." rows="6" required></textarea>
+
+
+                    <button type="submit" class="send-btn">
+
+                    <i class="fa-solid fa-paper-plane"></i>
+
+                    Send Message
+
+                </button>
+
+                </form>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer class="footer">
+
+        <div class="footer-container">
+
+
+            <div class="footer-brand">
+
+                <a href="{{ url_for('home') }}" class="logo">
+
+                    <span class="logo-icon">
+                    <i class="fa-solid fa-code"></i>
+                </span>
+
+                    <span class="logo-text">
+                    Code<span>Master</span>
+                    </span>
+
+                </a>
+
+                <p>
+                    Learn coding, solve problems, compete in contests and grow as a developer.
+                </p>
+
+            </div>
+
+
+            <div class="footer-links">
+
+                <h3>
+                    Platform
+                </h3>
+
+                <a href="{{ url_for('editor') }}">
+                Code Editor
+            </a>
+
+                <a href="{{ url_for('problems') }}">
+                Problems
+            </a>
+
+                <a href="{{ url_for('contests') }}">
+                Contests
+            </a>
+
+                <a href="{{ url_for('leaderboard') }}">
+                Leaderboard
+            </a>
+
+            </div>
+
+
+            <div class="footer-links">
+
+                <h3>
+                    Account
+                </h3>
+
+                <a href="{{ url_for('login') }}">
+                Login
+            </a>
+
+                <a href="{{ url_for('register') }}">
+                Register
+            </a>
+
+                <a href="{{ url_for('profile') }}">
+                Profile
+            </a>
+
+            </div>
+
+
+            <div class="footer-links">
+
+                <h3>
+                    Explore
+                </h3>
+
+                <a href="{{ url_for('home') }}#features">
+                Features
+            </a>
+
+                <a href="{{ url_for('home') }}#courses">
+                Courses
+            </a>
+
+                <a href="{{ url_for('home') }}#about">
+                About
+            </a>
+
+                <a href="{{ url_for('home') }}#contact">
+                Contact
+            </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="footer-bottom">
+
+            <p>
+                © 2026 CodeMaster. All rights reserved.
+            </p>
+
+
+            <div class="footer-social">
+
+                <a href="#" aria-label="GitHub">
+                    <i class="fa-brands fa-github"></i>
+                </a>
+
+                <a href="#" aria-label="LinkedIn">
+                    <i class="fa-brands fa-linkedin"></i>
+                </a>
+
+                <a href="#" aria-label="Twitter">
+                    <i class="fa-brands fa-x-twitter"></i>
+                </a>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+
+    <!-- ================= SCRIPT ================= -->
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+
+            const menuBtn =
+                document.getElementById("mobileMenuBtn");
+
+            const mobileNav =
+                document.getElementById("mobileNav");
+
+
+            if (!menuBtn || !mobileNav) {
+                return;
+            }
+
+
+            menuBtn.addEventListener("click", function() {
+
+                const isOpen =
+                    mobileNav.classList.toggle("active");
+
+                menuBtn.classList.toggle(
+                    "active",
+                    isOpen
+                );
+
+                menuBtn.setAttribute(
+                    "aria-expanded",
+                    isOpen ? "true" : "false"
+                );
+
+            });
+
+
+            /* Close menu after clicking a link */
+
+            const mobileLinks =
+                mobileNav.querySelectorAll("a");
+
+
+            mobileLinks.forEach(function(link) {
+
+                link.addEventListener("click", function() {
+
+                    mobileNav.classList.remove("active");
+
+                    menuBtn.classList.remove("active");
+
+                    menuBtn.setAttribute(
+                        "aria-expanded",
+                        "false"
+                    );
+
+                });
+
+            });
+
+
+            /* Close menu when clicking outside */
+
+            document.addEventListener("click", function(event) {
+
+                if (!mobileNav.contains(event.target) &&
+                    !menuBtn.contains(event.target)
+                ) {
+
+                    mobileNav.classList.remove("active");
+
+                    menuBtn.classList.remove("active");
+
+                    menuBtn.setAttribute(
+                        "aria-expanded",
+                        "false"
+                    );
+
+                }
+
+            });
+
+
+            /* Close menu when pressing Escape */
+
+            document.addEventListener("keydown", function(event) {
+
+                if (event.key === "Escape") {
+
+                    mobileNav.classList.remove("active");
+
+                    menuBtn.classList.remove("active");
+
+                    menuBtn.setAttribute(
+                        "aria-expanded",
+                        "false"
+                    );
+
+                }
+
+            });
+
+        });
+    </script>
+
+</body>
+
+</html>

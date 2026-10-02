@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ contest.title }} - CodeMaster</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='contest_detail.css') }}">
+</head>
+
+<body>
+
+    <!-- ================= TOP BAR ================= -->
+
+    <header class="topbar">
+
+        <div class="brand">
+
+            <span class="brand-code">&lt;/&gt;</span>
+
+            <span class="brand-name">
+                CodeMaster
+            </span>
+
+            <span class="slash">/</span>
+
+            <span class="contest-name">
+                {{ contest.title }}
+            </span>
+
+        </div>
+
+
+    </header>
+
+
+    <!-- ================= MAIN PAGE ================= -->
+
+    <div class="page">
+
+
+        <!-- ================= SIDEBAR ================= -->
+
+        <aside class="problem-sidebar">
+
+            <button class="back-btn" type="button" id="backToContests">
+
+                ← Back to Contests
+
+            </button>
+
+
+            <div class="sidebar-title">
+                Contest Problems
+            </div>
+
+
+
+            <div class="problem-item active" data-problem="1">
+
+                <span>Problem 1</span>
+                <strong>Two Sum</strong>
+
+            </div>
+
+            <div class="problem-item" data-problem="2">
+
+                <span>Problem 2</span>
+                <strong>Array Challenge</strong>
+
+            </div>
+
+            <div class="problem-item" data-problem="3">
+
+                <span>Problem 3</span>
+                <strong>String Challenge</strong>
+
+            </div>
+
+            <div class="problem-item" data-problem="4">
+
+                <span>Problem 4</span>
+                <strong>Algorithm Challenge</strong>
+
+            </div>
+
+            <div class="problem-item" data-problem="5">
+
+                <span>Problem 5</span>
+                <strong>Advanced Problem</strong>
+
+            </div>
+        </aside>
+
+
+
+        <!-- ================= CONTENT ================= -->
+
+        <main class="content">
+
+
+            <!-- CONTENT HEADER -->
+
+            <div class="content-header">
+
+                <div>
+
+                    <h1 id="problemTitle">
+                        Two Sum
+                    </h1>
+
+                    <p>
+                        {{ contest.title }}
+                    </p>
+
+                </div>
+
+
+                <span class="status live" id="contestStatus">
+
+                    LIVE CONTEST
+
+                </span>
+
+            </div>
+
+
+
+            <!-- ================= PROBLEM ================= -->
+
+            <section class="problem-card">
+
+                <span class="difficulty" id="difficulty">
+
+                    Easy
+
+                </span>
+
+
+                <h2 id="problemHeading">
+                    Two Sum
+                </h2>
+
+
+                <div class="problem-description" id="problemDescription">
+
+                    Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target. You may assume that each input would have exactly one solution. You may not use the same element twice.
+
+                </div>
+
+
+                <h3 class="section-title">
+                    Example
+                </h3>
+
+
+                <pre class="example" id="example">Input:
+nums = [2,7,11,15]
+target = 9
+
+Output:
+[0,1]
+
+Explanation:
+nums[0] + nums[1] = 2 + 7 = 9</pre>
+
+
+                <h3 class="section-title">
+                    Instructions
+                </h3>
+
+
+                <div class="problem-description">
+
+                    Read the input according to the problem statement. Write a complete program that solves the problem. Your solution should produce the required output for the given input format. Do not hardcode the expected output.
+
+                </div>
+
+            </section>
+
+
+
+            <!-- ================= CODE EDITOR ================= -->
+
+            <section class="editor-card">
+
+
+                <div class="editor-header">
+
+                    <span class="editor-title">
+                        Code Editor
+                    </span>
+
+
+                    <select id="language" class="language">
+
+                        <option value="python">
+                            Python
+                        </option>
+
+                        <option value="java">
+                            Java
+                        </option>
+
+                        <option value="c">
+                            C
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+
+                <textarea id="codeEditor" spellcheck="false" placeholder="Write your solution here...">nums = list(map(int, input().split()))
+target = int(input())
+
+for i in range(len(nums)):
+    for j in range(i + 1, len(nums)):
+
+        if nums[i] + nums[j] == target:
+            print([i, j])
+            break
+    else:
+        continue
+
+    break</textarea>
+
+
+
+                <!-- CUSTOM INPUT -->
+
+                <div class="input-area">
+
+                    <label for="customInput">
+                        Custom Input
+                    </label>
+
+
+                    <textarea id="customInput" spellcheck="false">2 7 11 15
+9</textarea>
+
+                </div>
+
+
+
+                <!-- BUTTONS -->
+
+                <div class="editor-footer">
+
+                    <button type="button" class="run-btn" id="runCodeBtn">
+
+                        ▶ Run Code
+
+                    </button>
+
+                    <button type="button" id="submitCodeBtn" class="submit-btn" onclick="submitCode()">✓ Submit</button>
+                </div>
+
+            </section>
+
+
+
+            <!-- ================= OUTPUT ================= -->
+
+            <section class="output-card" id="outputCard">
+
+                <div class="output-header">
+
+                    <h3>
+                        Output
+                    </h3>
+
+                    <span id="outputStatus">
+                        Ready
+                    </span>
+
+                </div>
+
+
+                <pre id="output">Run your code to see the output.</pre>
+
+            </section>
+
+
+        </main>
+
+    </div>
+
+
+
+    <!-- DATA FROM FLASK -->
+
+    <script>
+        window.CONTEST_ID = {
+            {
+                contest.id | tojson
+            }
+        };
+
+        window.CONTEST_END_TIME = {
+            {
+                contest.end_time | tojson
+            }
+        };
+    </script>
+
+
+    <script src="{{ url_for('static', filename='contest_detail.js') }}">
+    </script>
+
+</body>
+
+</html>

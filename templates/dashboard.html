@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CodeMaster | Dashboard</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+    <div class="dashboard-wrapper">
+
+        <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+        <aside class="sidebar">
+
+            <div class="logo">
+                <span class="logo-icon">
+                <i class="fa-solid fa-code"></i>
+            </span>
+                <span>CodeMaster</span>
+            </div>
+
+            <nav class="sidebar-nav">
+
+                <a href="/dashboard" class="nav-item active">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Dashboard</span>
+                </a>
+
+                <a href="/problems" class="nav-item">
+                    <i class="fa-solid fa-laptop-code"></i>
+                    <span>Problems</span>
+                </a>
+
+                <a href="/editor" class="nav-item">
+                    <i class="fa-solid fa-code"></i>
+                    <span>Code Editor</span>
+                </a>
+
+                <a href="/leaderboard" class="nav-item">
+                    <i class="fa-solid fa-trophy"></i>
+                    <span>Leaderboard</span>
+                </a>
+
+                <a href="/contests" class="nav-item">
+                    <i class="fa-solid fa-bullseye"></i>
+                    <span>Contests</span>
+                </a>
+
+                <a href="/certificates" class="nav-item">
+                    <i class="fa-solid fa-certificate"></i>
+                    <span>Certificates</span>
+                </a>
+
+                <a href="/profile" class="nav-item">
+                    <i class="fa-solid fa-user"></i>
+                    <span>Profile</span>
+                </a>
+
+            </nav>
+
+            <div class="sidebar-bottom">
+
+                <a href="/logout" class="nav-item logout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Logout</span>
+                </a>
+
+            </div>
+
+        </aside>
+
+
+        <!-- =====================================================
+         MAIN CONTENT
+    ====================================================== -->
+
+        <main class="main-content">
+
+            <!-- TOP BAR -->
+
+            <header class="topbar">
+
+                <div>
+                    <div class="page-label">
+                        <i class="fa-solid fa-chart-line"></i> Dashboard
+                    </div>
+
+                    <h1>
+                        Welcome,
+                        <span>{{ fullname if fullname else username }}</span> 👋
+                    </h1>
+
+                    <p class="welcome-text">
+                        Track your coding progress and keep improving your skills.
+                    </p>
+                </div>
+
+                <div class="topbar-right">
+
+                    <div class="live-status">
+                        <span class="live-dot"></span>
+                        <span>Live</span>
+                    </div>
+
+                    <div class="current-time" id="currentTime">
+                        --:--:--
+                    </div>
+
+                    <a href="/profile" class="profile-avatar">
+                    {{ (fullname if fullname else username)[0]|upper }}
+                </a>
+
+                </div>
+
+            </header>
+
+
+            <!-- =====================================================
+             STAT CARDS
+        ====================================================== -->
+
+            <section class="stats-grid">
+
+
+                <!-- Problems Solved -->
+
+                <div class="stat-card">
+
+                    <div class="stat-card-top">
+
+                        <div class="stat-icon problems-icon">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+
+                        <span class="stat-live">
+                        <span></span> Live
+                        </span>
+
+                    </div>
+
+                    <div class="stat-content">
+
+                        <p>Problems Solved</p>
+
+                        <h2 class="counter" data-value="{{ user.get('solved', 0) }}">
+                            0
+                        </h2>
+
+                        <div class="stat-footer">
+                            <i class="fa-solid fa-arrow-trend-up"></i>
+                            <span>Your coding progress</span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Rating -->
+
+                <div class="stat-card">
+
+                    <div class="stat-card-top">
+
+                        <div class="stat-icon rating-icon">
+                            <i class="fa-solid fa-star"></i>
+                        </div>
+
+                        <span class="rating-label">
+                        Code Rating
+                    </span>
+
+                    </div>
+
+                    <div class="stat-content">
+
+                        <p>Rating</p>
+
+                        <h2 class="counter" data-value="{{ user.get('rating', 1000) }}">
+                            0
+                        </h2>
+
+                        <div class="stat-footer">
+                            <i class="fa-solid fa-ranking-star"></i>
+
+                            <span>
+                            {% if rank %}
+                                Rank #{{ rank }}
+                            {% else %}
+                                Keep solving to improve
+                            {% endif %}
+                        </span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Certificates -->
+
+                <div class="stat-card certificate-card">
+
+                    <div class="stat-card-top">
+
+                        <div class="stat-icon certificate-icon">
+                            <i class="fa-solid fa-award"></i>
+                        </div>
+
+                        <span class="certificate-label">
+                        Achievement
+                    </span>
+
+                    </div>
+
+                    <div class="stat-content">
+
+                        <p>Certificates</p>
+
+                        {% if certificates %}
+
+                        <h2 class="certificate-active">
+                            <i class="fa-solid fa-check-circle"></i> Unlocked
+                        </h2>
+
+                        {% else %}
+
+                        <h2 class="certificate-none">
+                            None
+                        </h2>
+
+                        {% endif %}
+
+                        <div class="stat-footer">
+
+                            {% if certificates %}
+
+                            <i class="fa-solid fa-trophy"></i>
+                            <span>Certificate available</span> {% else %}
+
+                            <i class="fa-solid fa-lock"></i>
+                            <span>Keep solving problems</span> {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =====================================================
+             QUICK ACTIONS
+        ====================================================== -->
+
+            <section class="quick-actions">
+
+                <div class="section-heading">
+
+                    <div>
+                        <span class="section-mini-title">
+                        <i class="fa-solid fa-bolt"></i>
+                        QUICK ACTIONS
+                    </span>
+
+                        <h2>What do you want to do?</h2>
+                    </div>
+
+                </div>
+
+
+                <div class="action-grid">
+
+
+                    <!-- Start Coding -->
+
+                    <a href="/editor" class="action-card start-coding">
+
+                        <div class="action-icon">
+                            <i class="fa-solid fa-terminal"></i>
+                        </div>
+
+                        <div class="action-info">
+                            <h3>Start Coding</h3>
+
+                            <p>
+                                Open the code editor and start building.
+                            </p>
+                        </div>
+
+                        <div class="action-arrow">
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+
+                    </a>
+
+
+                    <!-- Practice Problems -->
+
+                    <a href="/problems" class="action-card practice">
+
+                        <div class="action-icon">
+                            <i class="fa-solid fa-puzzle-piece"></i>
+                        </div>
+
+                        <div class="action-info">
+                            <h3>Practice Problems</h3>
+
+                            <p>
+                                Solve coding problems and improve your skills.
+                            </p>
+                        </div>
+
+                        <div class="action-arrow">
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+
+                    </a>
+
+
+                    <!-- Leaderboard -->
+
+                    <a href="/leaderboard" class="action-card leaderboard">
+
+                        <div class="action-icon">
+                            <i class="fa-solid fa-trophy"></i>
+                        </div>
+
+                        <div class="action-info">
+                            <h3>Leaderboard</h3>
+
+                            <p>
+                                Check rankings and compare your progress.
+                            </p>
+                        </div>
+
+                        <div class="action-arrow">
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+
+                    </a>
+
+
+                    <!-- Contest -->
+
+                    <a href="/contests" class="action-card contest">
+
+                        <div class="action-icon">
+                            <i class="fa-solid fa-bullseye"></i>
+                        </div>
+
+                        <div class="action-info">
+                            <h3>Join Contest</h3>
+
+                            <p>
+                                Participate in coding contests and challenges.
+                            </p>
+                        </div>
+
+                        <div class="action-arrow">
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+
+                    </a>
+
+                </div>
+
+            </section>
+
+
+            <!-- =====================================================
+             PROGRESS + PROFILE
+        ====================================================== -->
+
+            <section class="bottom-grid">
+
+
+                <!-- Progress -->
+
+                <div class="dashboard-card progress-card">
+
+                    <div class="card-header">
+
+                        <div>
+                            <span class="section-mini-title">
+                            <i class="fa-solid fa-chart-simple"></i>
+                            YOUR PROGRESS
+                        </span>
+
+                            <h2>Coding Journey</h2>
+                        </div>
+
+                        <div class="progress-number">
+                            <strong>
+                            {{ user.get('solved', 0) }}
+                        </strong>
+                            <span>solved</span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="progress-content">
+
+                        <div class="progress-info">
+
+                            <span>Overall Progress</span>
+
+                            <strong id="progressPercent">
+                            0%
+                        </strong>
+
+                        </div>
+
+                        <div class="progress-bar">
+
+                            <div class="progress-fill" id="progressFill">
+                            </div>
+
+                        </div>
+
+                        <p class="progress-note">
+                            Keep solving problems to unlock achievements and certificates.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Account -->
+
+                <div class="dashboard-card account-card">
+
+                    <div class="card-header">
+
+                        <div>
+                            <span class="section-mini-title">
+                            <i class="fa-solid fa-user"></i>
+                            ACCOUNT
+                        </span>
+
+                            <h2>Your Profile</h2>
+                        </div>
+
+                    </div>
+
+
+                    <div class="account-info">
+
+                        <div class="account-avatar">
+                            {{ (fullname if fullname else username)[0]|upper }}
+                        </div>
+
+                        <div>
+
+                            <h3>
+                                {{ fullname if fullname else username }}
+                            </h3>
+
+                            <p>
+                                {{ email }}
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <a href="/profile" class="profile-button">
+                    View Profile
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+
+                </div>
+
+            </section>
+
+
+            <!-- =====================================================
+             RECENT ACTIVITY
+        ====================================================== -->
+
+            <section class="dashboard-card activity-card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <span class="section-mini-title">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        ACTIVITY
+                    </span>
+
+                        <h2>Recent Activity</h2>
+
+                    </div>
+
+                    <span class="activity-live">
+                    <span></span> Updated
+                    </span>
+
+                </div>
+
+
+                <div class="activity-content">
+
+                    <div class="activity-item">
+
+                        <div class="activity-icon">
+                            <i class="fa-solid fa-code"></i>
+                        </div>
+
+                        <div class="activity-text">
+
+                            <strong>
+                            Coding activity
+                        </strong>
+
+                            <span>
+                            Your solved problem count is synchronized
+                            with your account.
+                        </span>
+
+                        </div>
+
+                        <div class="activity-status">
+                            {{ user.get('solved', 0) }} Solved
+                        </div>
+
+                    </div>
+
+
+                    <div class="activity-item">
+
+                        <div class="activity-icon">
+                            <i class="fa-solid fa-star"></i>
+                        </div>
+
+                        <div class="activity-text">
+
+                            <strong>
+                            Current Rating
+                        </strong>
+
+                            <span>
+                            Your current CodeMaster rating.
+                        </span>
+
+                        </div>
+
+                        <div class="activity-status">
+                            {{ user.get('rating', 0) }}
+                        </div>
+
+                    </div>
+
+
+                    <div class="activity-item">
+
+                        <div class="activity-icon">
+                            <i class="fa-solid fa-award"></i>
+                        </div>
+
+                        <div class="activity-text">
+
+                            <strong>
+                            Certificate Status
+                        </strong>
+
+                            <span>
+                            Continue solving problems to unlock achievements.
+                        </span>
+
+                        </div>
+
+                        <div class="activity-status">
+                            {% if certificates %} Unlocked {% else %} Locked {% endif %}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- FOOTER -->
+
+            <footer class="dashboard-footer">
+
+                <span>
+                © 2026 CodeMaster
+            </span>
+
+                <span>
+                Keep Coding • Keep Learning • Keep Growing 🚀
+            </span>
+
+            </footer>
+
+        </main>
+
+    </div>
+
+
+    <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+
+</body>
+
+</html>

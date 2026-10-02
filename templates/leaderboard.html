@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CodeMaster | Leaderboard</title>
+
+
+    <!-- FONT AWESOME -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+
+    <!-- LEADERBOARD CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='leaderboard.css') }}">
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+     SIDEBAR
+===================================================== -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+
+            <span class="logo-icon">
+            <i class="fa-solid fa-code"></i>
+        </span>
+
+            <span>CodeMaster</span>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <a href="{{ url_for('dashboard') }}">
+
+                <i class="fa-solid fa-house"></i>
+
+                <span>Dashboard</span>
+
+            </a>
+
+
+            <a href="{{ url_for('problems') }}">
+
+                <i class="fa-solid fa-list-check"></i>
+
+                <span>Problems</span>
+
+            </a>
+
+
+            <a href="{{ url_for('editor') }}">
+
+                <i class="fa-solid fa-laptop-code"></i>
+
+                <span>Code Editor</span>
+
+            </a>
+
+
+            <a href="{{ url_for('leaderboard') }}" class="active">
+
+                <i class="fa-solid fa-ranking-star"></i>
+
+                <span>Leaderboard</span>
+
+            </a>
+
+
+            <a href="{{ url_for('contests') }}">
+
+                <i class="fa-solid fa-trophy"></i>
+
+                <span>Contests</span>
+
+            </a>
+
+
+            <a href="{{ url_for('profile') }}">
+
+                <i class="fa-solid fa-user"></i>
+
+                <span>Profile</span>
+
+            </a>
+
+
+            <a href="{{ url_for('logout') }}">
+
+                <i class="fa-solid fa-right-from-bracket"></i>
+
+                <span>Logout</span>
+
+            </a>
+
+        </nav>
+
+    </aside>
+
+
+
+    <!-- =====================================================
+     MAIN CONTENT
+===================================================== -->
+
+    <main class="main-content">
+
+
+        <!-- HEADER -->
+
+        <div class="page-header">
+
+            <div>
+
+                <h1>
+
+                    <i class="fa-solid fa-ranking-star"></i> Global Leaderboard
+
+                </h1>
+
+                <p>
+                    Compete with other CodeMaster developers
+                </p>
+
+            </div>
+
+
+            <!-- SEARCH -->
+
+            <div class="search-box">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input type="text" id="playerSearch" placeholder="Search player...">
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================================
+         CURRENT USER CARD
+    ===================================================== -->
+
+        {% if current_user %}
+
+        <section class="my-rank-card">
+
+            <div class="my-rank-left">
+
+                <div class="my-rank-icon">
+
+                    <i class="fa-solid fa-user"></i>
+
+                </div>
+
+
+                <div>
+
+                    <span class="small-label">
+                    YOUR POSITION
+                </span>
+
+                    <h2>
+                        #{{ current_user.rank }}
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div class="my-stat">
+
+                <span>
+                Problems Solved
+            </span>
+
+                <strong>
+                {{ current_user.problems_solved }}
+            </strong>
+
+            </div>
+
+
+            <div class="my-stat">
+
+                <span>
+                Rating
+            </span>
+
+                <strong>
+                {{ current_user.rating }}
+            </strong>
+
+            </div>
+
+
+            <div class="my-badge">
+
+                <span>
+                {{ current_user.badge_icon }}
+            </span> {{ current_user.badge }}
+
+            </div>
+
+        </section>
+
+        {% endif %}
+
+
+
+        <!-- =====================================================
+         TOP 3
+===================================================== -->
+
+        {% if top_three %}
+
+        <section class="podium-section">
+
+            {% for user in top_three %}
+
+            <div class="podium-card rank-{{ user.rank }}">
+
+                <div class="podium-rank">
+
+                    {% if user.rank == 1 %}
+
+                    <i class="fa-solid fa-crown"></i> {% elif user.rank == 2 %}
+
+                    <i class="fa-solid fa-medal"></i> {% else %}
+
+                    <i class="fa-solid fa-award"></i> {% endif %}
+
+                </div>
+
+
+                <div class="podium-number">
+
+                    #{{ user.rank }}
+
+                </div>
+
+
+                <h2>
+                    {{ user.name }}
+                </h2>
+
+
+                <p class="podium-email">
+
+                    {{ user.email }}
+
+                </p>
+
+
+                <div class="podium-solved">
+
+                    <strong>
+                    {{ user.problems_solved }}
+                </strong>
+
+                    <span>
+                    Problems Solved
+                </span>
+
+                </div>
+
+
+                <div class="podium-rating">
+
+                    <i class="fa-solid fa-star"></i> Rating {{ user.rating }}
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </section>
+
+        {% endif %}
+
+
+
+        <!-- =====================================================
+         LEADERBOARD TABLE
+===================================================== -->
+
+        <section class="leaderboard-card">
+
+
+            <div class="table-header">
+
+                <div>
+
+                    <h2>
+                        All Players
+                    </h2>
+
+                    <p>
+                        Ranking based on problems solved
+                    </p>
+
+                </div>
+
+
+                <div class="live-status">
+
+                    <span class="live-dot"></span> Live Ranking
+
+                </div>
+
+            </div>
+
+
+
+            <div class="table-wrapper">
+
+                <table id="leaderboardTable">
+
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Rank
+                            </th>
+
+                            <th>
+                                Player
+                            </th>
+
+                            <th>
+                                Problems Solved
+                            </th>
+
+                            <th>
+                                Rating
+                            </th>
+
+                            <th>
+                                Badge
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+
+                        {% for user in leaderboard %}
+
+                        <tr data-name="{{ user.name|lower }}" data-email="{{ user.email|lower }}" data-username="{{ user.username|lower }}" class="{% if current_user and user.id == current_user.id %}current-player{% endif %}">
+
+
+                            <!-- RANK -->
+
+                            <td>
+
+                                {% if user.rank == 1 %}
+
+                                <span class="rank-medal gold">
+                                    🥇
+                                </span> {% elif user.rank == 2 %}
+
+                                <span class="rank-medal silver">
+                                    🥈
+                                </span> {% elif user.rank == 3 %}
+
+                                <span class="rank-medal bronze">
+                                    🥉
+                                </span> {% else %}
+
+                                <span class="rank-number">
+                                    {{ user.rank }}
+                                </span> {% endif %}
+
+                            </td>
+
+
+
+                            <!-- PLAYER -->
+
+                            <td>
+
+                                <div class="player-info">
+
+                                    <div class="avatar">
+
+                                        {{ user.name[0]|upper }}
+
+                                    </div>
+
+
+                                    <div class="player-details">
+
+                                        <strong>
+                                        {{ user.name }}
+                                    </strong>
+
+                                        <span>
+                                        {{ user.email }}
+                                    </span>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+
+                            <!-- SOLVED -->
+
+                            <td>
+
+                                <div class="solved-count">
+
+                                    <i class="fa-solid fa-circle-check"></i>
+
+                                    <strong>
+                                    {{ user.problems_solved }}
+                                </strong>
+
+                                </div>
+
+                            </td>
+
+
+
+                            <!-- RATING -->
+
+                            <td>
+
+                                <div class="rating">
+
+                                    <i class="fa-solid fa-star"></i> {{ user.rating }}
+
+                                </div>
+
+                            </td>
+
+
+
+                            <!-- BADGE -->
+
+                            <td>
+
+                                <span class="badge">
+
+                                <span>
+                                    {{ user.badge_icon }}
+                                </span> {{ user.badge }}
+
+                                </span>
+
+                            </td>
+
+
+                        </tr>
+
+
+                        {% endfor %}
+
+
+                    </tbody>
+
+                </table>
+
+
+                <!-- NO SEARCH RESULT -->
+
+                <div id="noResults" class="no-results">
+
+                    <i class="fa-solid fa-user-slash"></i>
+
+                    <h3>
+                        No player found
+                    </h3>
+
+                    <p>
+                        Try another name, username or email.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- FOOTER INFO -->
+
+        <div class="leaderboard-info">
+
+            <div>
+
+                <i class="fa-solid fa-circle-info"></i> Ranking updates automatically after a correct problem submission.
+
+            </div>
+
+
+            <div>
+
+                <i class="fa-solid fa-shield-halved"></i> Every solved problem is counted only once per account.
+
+            </div>
+
+        </div>
+
+
+    </main>
+
+
+
+    <!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+
+    <script src="{{ url_for('static', filename='leaderboard.js') }}"></script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CodeMaster | Problems</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='problems.css') }}">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+     SIDEBAR
+===================================================== -->
+
+    <div class="sidebar">
+
+        <div class="logo">
+
+            <i class="fa-solid fa-code"></i>
+
+            <h2>CodeMaster</h2>
+
+        </div>
+
+
+        <ul>
+
+            <li>
+                <a href="{{ url_for('dashboard') }}">
+                    <i class="fa-solid fa-house"></i> Dashboard
+                </a>
+            </li>
+
+
+            <li class="active">
+                <a href="{{ url_for('problems') }}">
+                    <i class="fa-solid fa-list-check"></i> Problems
+                </a>
+            </li>
+
+
+            <li>
+                <a href="{{ url_for('editor') }}">
+                    <i class="fa-solid fa-laptop-code"></i> Code Editor
+                </a>
+            </li>
+
+
+            <li>
+                <a href="{{ url_for('leaderboard') }}">
+                    <i class="fa-solid fa-ranking-star"></i> Leaderboard
+                </a>
+            </li>
+
+
+            <li>
+                <a href="{{ url_for('contests') }}">
+                    <i class="fa-solid fa-trophy"></i> Contests
+                </a>
+            </li>
+
+
+            <li>
+                <a href="{{ url_for('profile') }}">
+                    <i class="fa-solid fa-user"></i> Profile
+                </a>
+            </li>
+
+
+            <li>
+                <a href="{{ url_for('logout') }}">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </a>
+            </li>
+
+        </ul>
+
+    </div>
+
+
+
+    <!-- =====================================================
+     MAIN CONTENT
+===================================================== -->
+
+    <div class="main-content">
+
+
+        <!-- HEADER -->
+
+        <header>
+
+            <div>
+
+                <h1>Coding Problems</h1>
+
+                <p>
+                    Practice interview coding problems and improve your programming skills.
+                </p>
+
+            </div>
+
+
+            <!-- SEARCH -->
+
+            <div class="search-box">
+
+                <input type="text" id="searchInput" placeholder="Search problems..." autocomplete="off">
+
+            </div>
+
+        </header>
+
+
+
+        <!-- =====================================================
+         FILTERS
+    ====================================================== -->
+
+        <div class="filters">
+
+
+            <!-- DIFFICULTY -->
+
+            <select id="difficulty">
+
+            <option value="All">
+                All Difficulties
+            </option>
+
+            <option value="Easy">
+                Easy
+            </option>
+
+            <option value="Medium">
+                Medium
+            </option>
+
+            <option value="Hard">
+                Hard
+            </option>
+
+        </select>
+
+
+
+            <!-- CATEGORY -->
+
+            <select id="category">
+
+            <option value="All">
+                All Categories
+            </option>
+
+            <option value="Arrays">
+                Arrays
+            </option>
+
+            <option value="Strings">
+                Strings
+            </option>
+
+            <option value="Math">
+                Math
+            </option>
+
+            <option value="Linked List">
+                Linked List
+            </option>
+
+            <option value="Stack">
+                Stack
+            </option>
+
+            <option value="Queue">
+                Queue
+            </option>
+
+            <option value="Trees">
+                Trees
+            </option>
+
+            <option value="Graphs">
+                Graphs
+            </option>
+
+            <option value="Dynamic Programming">
+                Dynamic Programming
+            </option>
+
+        </select>
+
+
+        </div>
+
+
+
+        <!-- =====================================================
+         PROBLEM COUNT
+    ====================================================== -->
+
+
+
+        <!-- =====================================================
+         PROBLEM TABLE
+    ====================================================== -->
+
+        <div class="table-container">
+
+            <table id="problemTable">
+
+
+                <!-- TABLE HEADER -->
+
+                <thead>
+
+                    <tr>
+
+                        <th>ID</th>
+
+                        <th>Problem</th>
+
+                        <th>Difficulty</th>
+
+                        <th>Category</th>
+
+                        <th>Status</th>
+
+                        <th>Action</th>
+
+                    </tr>
+
+                </thead>
+
+
+
+                <!-- TABLE BODY -->
+
+                <tbody>
+
+
+                    {% for problem in problems %}
+
+
+                    <tr data-difficulty="{{ problem['difficulty'] }}" data-category="{{ problem['category'] }}" data-search="{{ problem['title'] }} {{ problem['category'] }}">
+
+
+                        <!-- ID -->
+
+                        <td>
+                            {{ problem['id'] }}
+                        </td>
+
+
+
+                        <!-- TITLE -->
+
+                        <td>
+
+                            <strong>
+                            {{ problem['title'] }}
+                        </strong>
+
+                        </td>
+
+
+
+                        <!-- DIFFICULTY -->
+
+                        <td>
+
+                            {% if problem['difficulty'] == 'Easy' %}
+
+                            <span class="difficulty easy">
+                                Easy
+                            </span> {% elif problem['difficulty'] == 'Medium' %}
+
+                            <span class="difficulty medium">
+                                Medium
+                            </span> {% else %}
+
+                            <span class="difficulty hard">
+                                Hard
+                            </span> {% endif %}
+
+                        </td>
+
+
+
+                        <!-- CATEGORY -->
+
+                        <td>
+
+                            {{ problem['category'] }}
+
+                        </td>
+
+
+
+                        <!-- STATUS -->
+
+
+                        <!-- STATUS -->
+
+                        <td>
+                            {% if problem.id in solved_problems %}
+                            <span class="solved-badge"> Solved</span> {% else %}
+                            <span class="unsolved-badge">Not Solved</span> {% endif %}
+                        </td>
+
+                        <!-- SOLVE BUTTON -->
+
+                        <td>
+
+                            <a href="{{ url_for('problem', problem_id=problem['id']) }}" class="solve-btn">
+                            Solve
+                        </a>
+
+                        </td>
+
+
+                    </tr>
+
+
+                    {% endfor %}
+
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+
+    <script src="{{ url_for('static', filename='problems.js') }}"></script>
+
+
+</body>
+
+</html>

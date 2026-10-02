@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CodeMaster | Create Account</title>
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='register.css') }}">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+</head>
+
+<body>
+
+    <div class="page-wrapper">
+
+        <!-- ================= LEFT HERO ================= -->
+        <section class="hero-section">
+
+            <div class="hero-overlay"></div>
+
+            <div class="hero-content">
+
+                <div class="brand">
+                    <div class="brand-icon">
+                        <i class="fa-solid fa-code"></i>
+                    </div>
+
+                    <span>CodeMaster</span>
+                </div>
+
+                <div class="hero-text">
+
+                    <span class="welcome-badge">
+                    <i class="fa-solid fa-sparkles"></i>
+                    Start Your Coding Journey
+                </span>
+
+                    <h1>
+                        Build Skills.<br>
+                        <span>Code Better.</span><br> Go Further.
+                    </h1>
+
+                    <p>
+                        Join CodeMaster and practice real coding problems, participate in live contests, improve your ranking, and grow your programming skills.
+                    </p>
+
+                </div>
+
+                <!-- Image -->
+                <div class="hero-image">
+
+                    <div class="image-glow"></div>
+
+                    <img src="{{ url_for('static', filename='images/computer2.png') }}" alt="Coding illustration">
+
+                </div>
+
+                <div class="hero-features">
+
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <i class="fa-solid fa-laptop-code"></i>
+                        </div>
+
+                        <div>
+                            <strong>135+</strong>
+                            <span>Coding Problems</span>
+                        </div>
+                    </div>
+
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <i class="fa-solid fa-trophy"></i>
+                        </div>
+
+                        <div>
+                            <strong>Live</strong>
+                            <span>Contests</span>
+                        </div>
+                    </div>
+
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+
+                        <div>
+                            <strong>Track</strong>
+                            <span>Your Progress</span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= RIGHT REGISTER ================= -->
+        <section class="register-section">
+
+            <div class="register-card">
+
+                <div class="mobile-brand">
+                    <div class="brand-icon">
+                        <i class="fa-solid fa-code"></i>
+                    </div>
+                    <span>CodeMaster</span>
+                </div>
+
+                <div class="form-header">
+
+                    <span class="form-badge">
+                    <i class="fa-solid fa-user-plus"></i>
+                    New Account
+                </span>
+
+                    <h2>Create your account</h2>
+
+                    <p>
+                        Enter your details to join CodeMaster.
+                    </p>
+
+                </div>
+
+
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages() %} {% if messages %}
+                <div class="messages">
+
+                    {% for message in messages %}
+
+                    <div class="flash-message">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span>{{ message }}</span>
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+                {% endif %} {% endwith %}
+
+
+                <!-- Registration Form -->
+                <form method="POST" action="{{ url_for('register') }}" enctype="multipart/form-data" id="registerForm">
+
+
+                    <!-- Full Name + Username -->
+                    <div class="form-row">
+
+                        <div class="field">
+
+                            <label for="fullname">
+                            Full Name
+                        </label>
+
+                            <div class="input-wrapper">
+
+                                <i class="fa-solid fa-user input-icon"></i>
+
+                                <input type="text" id="fullname" name="fullname" placeholder="Enter your full name" autocomplete="name" required>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label for="username">
+                            Username
+                        </label>
+
+                            <div class="input-wrapper">
+
+                                <i class="fa-solid fa-at input-icon"></i>
+
+                                <input type="text" id="username" name="username" placeholder="Choose a username" autocomplete="username" required>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Email + Phone -->
+                    <div class="form-row">
+
+                        <div class="field">
+
+                            <label for="email">
+                            Email Address
+                        </label>
+
+                            <div class="input-wrapper">
+
+                                <i class="fa-solid fa-envelope input-icon"></i>
+
+                                <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label for="phone">
+                            Phone Number
+                        </label>
+
+                            <div class="input-wrapper">
+
+                                <i class="fa-solid fa-phone input-icon"></i>
+
+                                <input type="tel" id="phone" name="phone" placeholder="Enter phone number" autocomplete="tel" required>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Password -->
+                    <div class="field">
+
+                        <label for="password">
+                        Password
+                    </label>
+
+                        <div class="input-wrapper">
+
+                            <i class="fa-solid fa-lock input-icon"></i>
+
+                            <input type="password" id="password" name="password" placeholder="Create a strong password" autocomplete="new-password" required>
+
+                            <button type="button" class="password-toggle" data-target="password" aria-label="Show password">
+
+                            <i class="fa-solid fa-eye"></i>
+
+                        </button>
+
+                        </div>
+
+                        <div class="password-strength">
+                            <div class="strength-bar">
+                                <span></span>
+                            </div>
+
+                            <small id="strengthText">
+                            Use 8+ characters with letters and numbers
+                        </small>
+                        </div>
+
+                    </div>
+
+
+                    <!-- Confirm Password -->
+                    <div class="field">
+
+                        <label for="confirm_password">
+                        Confirm Password
+                    </label>
+
+                        <div class="input-wrapper">
+
+                            <i class="fa-solid fa-shield-halved input-icon"></i>
+
+                            <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-enter your password" autocomplete="new-password" required>
+
+                            <button type="button" class="password-toggle" data-target="confirm_password" aria-label="Show confirm password">
+
+                            <i class="fa-solid fa-eye"></i>
+
+                        </button>
+
+                        </div>
+
+                        <small id="matchMessage"></small>
+
+                    </div>
+
+
+                    <!-- Profile + Language -->
+                    <div class="form-row">
+
+                        <div class="field">
+
+                            <label for="profile_image">
+                            Profile Picture
+                        </label>
+
+                            <div class="file-upload">
+
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+
+                                <div class="file-content">
+
+                                    <strong id="fileName">
+                                    Choose an image
+                                </strong>
+
+                                    <span>
+                                    PNG, JPG or JPEG
+                                </span>
+
+                                </div>
+
+                                <input type="file" id="profile_image" name="profile_image" accept="image/png,image/jpeg,image/jpg">
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label for="language">
+                            Preferred Language
+                        </label>
+
+                            <div class="input-wrapper">
+
+                                <i class="fa-solid fa-code input-icon"></i>
+
+                                <select id="language" name="language" required>
+
+                                <option value="" disabled selected>
+                                    Select language
+                                </option>
+
+                                <option value="Python">
+                                    Python
+                                </option>
+
+                                <option value="C">
+                                    C
+                                </option>
+
+                                <option value="C++">
+                                    C++
+                                </option>
+
+                                <option value="Java">
+                                    Java
+                                </option>
+
+                            </select>
+
+                                <i class="fa-solid fa-chevron-down select-arrow"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Terms -->
+                    <div class="terms">
+
+                        <label class="checkbox">
+
+                        <input type="checkbox"
+                               id="terms"
+                               required>
+
+                        <span class="checkmark">
+                            <i class="fa-solid fa-check"></i>
+                        </span>
+
+                        <span class="terms-text">
+                            I agree to the CodeMaster
+                            <a href="#">Terms & Conditions</a>
+                            and
+                            <a href="#">Privacy Policy</a>.
+                        </span>
+
+                    </label>
+
+                    </div>
+
+
+                    <!-- Register -->
+                    <button type="submit" class="register-btn" id="registerButton">
+
+                    <span>
+                        Create Account
+                    </span>
+
+                    <i class="fa-solid fa-arrow-right"></i>
+
+                </button>
+
+
+                    <!-- Login -->
+                    <div class="login-link">
+
+                        <span>
+                        Already have an account?
+                    </span>
+
+                        <a href="{{ url_for('login') }}">
+                        Login
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+
+            /* ================= PASSWORD TOGGLE ================= */
+
+            document.querySelectorAll(".password-toggle").forEach(button => {
+
+                button.addEventListener("click", () => {
+
+                    const targetId = button.dataset.target;
+                    const input = document.getElementById(targetId);
+                    const icon = button.querySelector("i");
+
+                    if (!input) return;
+
+                    if (input.type === "password") {
+
+                        input.type = "text";
+
+                        icon.classList.remove("fa-eye");
+                        icon.classList.add("fa-eye-slash");
+
+                        button.setAttribute(
+                            "aria-label",
+                            "Hide password"
+                        );
+
+                    } else {
+
+                        input.type = "password";
+
+                        icon.classList.remove("fa-eye-slash");
+                        icon.classList.add("fa-eye");
+
+                        button.setAttribute(
+                            "aria-label",
+                            "Show password"
+                        );
+
+                    }
+
+                });
+
+            });
+
+
+            /* ================= PASSWORD STRENGTH ================= */
+
+            const password = document.getElementById("password");
+            const strengthText = document.getElementById("strengthText");
+            const strengthBar = document.querySelector(".strength-bar span");
+
+            if (password) {
+
+                password.addEventListener("input", () => {
+
+                    const value = password.value;
+
+                    let score = 0;
+
+                    if (value.length >= 8) score++;
+                    if (/[A-Z]/.test(value)) score++;
+                    if (/[a-z]/.test(value)) score++;
+                    if (/[0-9]/.test(value)) score++;
+                    if (/[^A-Za-z0-9]/.test(value)) score++;
+
+                    const widths = [
+                        "0%",
+                        "20%",
+                        "40%",
+                        "60%",
+                        "80%",
+                        "100%"
+                    ];
+
+                    strengthBar.style.width = widths[score];
+
+                    if (!value) {
+
+                        strengthText.textContent =
+                            "Use 8+ characters with letters and numbers";
+
+                    } else if (score <= 2) {
+
+                        strengthText.textContent =
+                            "Weak password";
+
+                    } else if (score === 3) {
+
+                        strengthText.textContent =
+                            "Medium password";
+
+                    } else {
+
+                        strengthText.textContent =
+                            "Strong password";
+
+                    }
+
+                });
+
+            }
+
+
+            /* ================= CONFIRM PASSWORD ================= */
+
+            const confirmPassword =
+                document.getElementById("confirm_password");
+
+            const matchMessage =
+                document.getElementById("matchMessage");
+
+            if (confirmPassword) {
+
+                confirmPassword.addEventListener("input", () => {
+
+                    if (!confirmPassword.value) {
+
+                        matchMessage.textContent = "";
+
+                        return;
+
+                    }
+
+                    if (confirmPassword.value === password.value) {
+
+                        matchMessage.textContent =
+                            "✓ Passwords match";
+
+                        matchMessage.className = "match-success";
+
+                    } else {
+
+                        matchMessage.textContent =
+                            "Passwords do not match";
+
+                        matchMessage.className = "match-error";
+
+                    }
+
+                });
+
+            }
+
+
+            /* ================= FILE NAME ================= */
+
+            const fileInput =
+                document.getElementById("profile_image");
+
+            const fileName =
+                document.getElementById("fileName");
+
+            if (fileInput) {
+
+                fileInput.addEventListener("change", () => {
+
+                    if (fileInput.files.length > 0) {
+
+                        fileName.textContent =
+                            fileInput.files[0].name;
+
+                    } else {
+
+                        fileName.textContent =
+                            "Choose an image";
+
+                    }
+
+                });
+
+            }
+
+
+            /* ================= FORM ================= */
+
+            const form =
+                document.getElementById("registerForm");
+
+            if (form) {
+
+                form.addEventListener("submit", event => {
+
+                    if (
+                        password.value !==
+                        confirmPassword.value
+                    ) {
+
+                        event.preventDefault();
+
+                        matchMessage.textContent =
+                            "Passwords do not match";
+
+                        matchMessage.className =
+                            "match-error";
+
+                        confirmPassword.focus();
+
+                        return;
+
+                    }
+
+                });
+
+            }
+
+        });
+    </script>
+
+</body>
+
+</html>

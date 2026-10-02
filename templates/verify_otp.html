@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP - CodeMaster</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='verify_otp.css') }}">
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="otp-card">
+
+            <div class="logo">
+                <h1>Code<span>Master</span></h1>
+            </div>
+
+            <div class="icon">🔐</div>
+
+            <h2>Verify OTP</h2>
+            {% with messages = get_flashed_messages() %} {% if messages %}
+            <div class="error-message">
+                {{ messages[0] }}
+            </div>
+            {% endif %} {% endwith %}
+            <p>Enter the 6 digit verification code sent to your Gmail</p>
+
+            <form id="otpForm" method="POST" action="/verify-otp">
+
+                <div class="otp-box">
+                    <input type="text" class="otp-input" maxlength="1" autocomplete="off">
+                    <input type="text" class="otp-input" maxlength="1" autocomplete="off">
+                    <input type="text" class="otp-input" maxlength="1" autocomplete="off">
+                    <input type="text" class="otp-input" maxlength="1" autocomplete="off">
+                    <input type="text" class="otp-input" maxlength="1" autocomplete="off">
+                    <input type="text" class="otp-input" maxlength="1" autocomplete="off">
+                </div>
+
+                <input type="hidden" id="finalOTP" name="otp">
+
+                <div class="timer">
+                    OTP expires in <span id="timer">60</span> seconds
+                </div>
+
+                <button type="submit" id="verifyBtn"> Verify OTP</button>
+
+            </form>
+
+            <div class="resend">
+                <p>Didn't receive OTP?</p>
+                <button type="button" id="resendBtn">Resend OTP</button>
+            </div>
+
+            <a href="/forgot-password">Change Email</a>
+
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='verify_otp.js') }}"></script>
+</body>
+
+</html>

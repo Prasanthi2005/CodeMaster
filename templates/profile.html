@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CodeMaster | Profile</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='profile.css') }}">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+     SIDEBAR
+===================================================== -->
+
+    <div class="sidebar">
+
+        <div class="logo">
+
+            <i class="fa-solid fa-code"></i>
+
+            <h2>CodeMaster</h2>
+
+        </div>
+
+
+        <ul>
+
+            <li>
+                <a href="{{ url_for('dashboard') }}">
+                    <i class="fa-solid fa-house"></i> Dashboard
+                </a>
+            </li>
+
+
+            <li>
+                <a href="{{ url_for('problems') }}">
+                    <i class="fa-solid fa-list-check"></i> Problems
+                </a>
+            </li>
+
+
+            <li>
+                <a href="{{ url_for('editor') }}">
+                    <i class="fa-solid fa-laptop-code"></i> Code Editor
+                </a>
+            </li>
+
+
+            <li>
+                <a href="{{ url_for('leaderboard') }}">
+                    <i class="fa-solid fa-ranking-star"></i> Leaderboard
+                </a>
+            </li>
+
+
+            <li>
+                <a href="{{ url_for('contests') }}">
+                    <i class="fa-solid fa-trophy"></i> Contests
+                </a>
+            </li>
+
+
+            <li class="active">
+                <a href="{{ url_for('profile') }}">
+                    <i class="fa-solid fa-user"></i> Profile
+                </a>
+            </li>
+
+
+            <li>
+                <a href="{{ url_for('certificate') }}">
+                    <i class="fa-solid fa-certificate"></i> Certificates
+                </a>
+            </li>
+
+
+            <li>
+                <a href="{{ url_for('logout') }}">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </a>
+            </li>
+
+        </ul>
+
+    </div>
+
+
+
+    <!-- =====================================================
+     MAIN CONTENT
+===================================================== -->
+
+    <div class="main-content">
+
+
+        <!-- HEADER -->
+
+        <header>
+
+            <h1>
+                <i class="fa-solid fa-user-circle"></i> My Profile
+            </h1>
+
+        </header>
+
+
+
+        <!-- =================================================
+         PROFILE CONTAINER
+    ================================================== -->
+
+        <div class="profile-container">
+
+
+
+            <!-- =================================================
+             LEFT PROFILE CARD
+        ================================================== -->
+
+            <div class="profile-card">
+
+
+                <!-- PROFILE IMAGE -->
+
+                <div class="profile-image-wrapper">
+
+                    {% if user.profile_image %}
+
+                    <img src="{{ url_for('static', filename='profile_images/' + user.profile_image) }}" alt="Profile" class="profile-image" id="profileImage"> {% else %}
+
+                    <div class="default-profile-image" id="profileImage">
+
+                        <i class="fa-solid fa-user"></i>
+
+                    </div>
+
+                    {% endif %}
+
+                </div>
+
+
+
+                <!-- USERNAME -->
+
+                <h2>
+                    {{ user.username }}
+                </h2>
+
+
+
+                <!-- LANGUAGE -->
+
+                <p class="developer-text">
+
+                    {% if user.language %} {{ user.language }} Developer {% else %} Developer {% endif %}
+
+                </p>
+
+
+
+                <!-- BADGE -->
+
+                <span class="badge">
+
+                <i class="fa-solid fa-code"></i>
+
+                CodeMaster User
+
+            </span>
+
+
+
+                <!-- EDIT BUTTON -->
+
+                <button type="button" class="edit-profile-btn" id="openEditProfile">
+
+                <i class="fa-solid fa-pen"></i>
+
+                Edit Profile
+
+            </button>
+
+
+            </div>
+
+
+
+            <!-- =================================================
+             RIGHT DETAILS CARD
+        ================================================== -->
+
+            <div class="details-card">
+
+
+                <!-- PERSONAL INFORMATION -->
+
+                <h2 class="section-title">
+
+                    <i class="fa-solid fa-user"></i> Personal Information
+
+                </h2>
+
+
+
+                <table class="profile-table">
+
+
+                    <!-- FULL NAME -->
+
+                    <tr>
+
+                        <td>
+                            <b>Full Name</b>
+                        </td>
+
+                        <td>
+                            {{ user.fullname or 'Not provided' }}
+                        </td>
+
+                    </tr>
+
+
+
+                    <!-- USERNAME -->
+
+                    <tr>
+
+                        <td>
+                            <b>Username</b>
+                        </td>
+
+                        <td>
+                            {{ user.username or 'Not provided' }}
+                        </td>
+
+                    </tr>
+
+
+
+                    <!-- EMAIL -->
+
+                    <tr>
+
+                        <td>
+                            <b>Email</b>
+                        </td>
+
+                        <td>
+                            {{ user.email or 'Not provided' }}
+                        </td>
+
+                    </tr>
+
+
+
+                    <!-- PHONE -->
+
+                    <tr>
+
+                        <td>
+                            <b>Phone</b>
+                        </td>
+
+                        <td>
+                            {{ user.phone or 'Not provided' }}
+                        </td>
+
+                    </tr>
+
+
+
+                    <!-- LANGUAGE -->
+
+                    <tr>
+
+                        <td>
+                            <b>Language</b>
+                        </td>
+
+                        <td>
+                            {{ user.language or 'Not provided' }}
+                        </td>
+
+                    </tr>
+
+
+
+                    <!-- COUNTRY -->
+
+                    <tr>
+
+                        <td>
+                            <b>Country</b>
+                        </td>
+
+                        <td>
+                            India
+                        </td>
+
+                    </tr>
+
+
+                </table>
+
+
+
+                <hr>
+
+
+
+                <!-- =================================================
+                 STATISTICS
+            ================================================== -->
+
+                <h2 class="section-title">
+
+                    <i class="fa-solid fa-chart-simple"></i> Statistics
+
+                </h2>
+
+
+
+                <div class="stats">
+
+
+                    <div class="box">
+
+                        <div class="stat-icon">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+
+                        <h3>
+                            {{ user.solved if user.solved is not none else 0 }}
+                        </h3>
+
+                        <p>
+                            Problems Solved
+                        </p>
+
+                    </div>
+
+
+
+                    <!-- RATING -->
+
+                    <div class="box">
+
+                        <div class="stat-icon">
+
+                            <i class="fa-solid fa-star"></i>
+
+                        </div>
+                        <h3>
+                            {{ user.rating if user.rating is not none else 0 }}
+                        </h3>
+                        <p>
+                            Rating
+                        </p>
+
+                    </div>
+
+
+
+                    <!-- RANK -->
+
+                    <div class="box">
+
+                        <div class="stat-icon">
+
+                            <i class="fa-solid fa-ranking-star"></i>
+
+                        </div>
+
+
+                        {% if user.rank and user.rank != 0 %}
+
+                        <h3>
+                            #{{ user.rank }}
+                        </h3>
+
+                        {% else %}
+
+                        <h3>
+                            -
+                        </h3>
+
+                        {% endif %}
+
+
+                        <p>
+                            Rank
+                        </p>
+
+                    </div>
+
+
+
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- =====================================================
+     EDIT PROFILE MODAL
+===================================================== -->
+
+    <div class="modal-overlay" id="editModal">
+
+
+        <div class="edit-modal">
+
+
+            <!-- MODAL HEADER -->
+
+            <div class="modal-header">
+
+                <h2>
+
+                    <i class="fa-solid fa-user-pen"></i> Edit Profile
+
+                </h2>
+
+
+                <button type="button" class="close-modal" id="closeEditProfile">
+
+                <i class="fa-solid fa-xmark"></i>
+
+            </button>
+
+            </div>
+
+
+
+            <!-- EDIT FORM -->
+
+            <form id="editProfileForm" method="POST" action="{{ url_for('update_profile') }}" enctype="multipart/form-data">
+
+
+                <!-- PROFILE IMAGE -->
+
+                <div class="edit-image-section">
+
+
+                    <div class="edit-image-preview">
+
+                        {% if user.profile_image %}
+
+                        <img src="{{ url_for('static', filename='profile_images/' + user.profile_image) }}" id="editPreview" alt="Profile"> {% else %}
+
+                        <div class="edit-default-image" id="editPreview">
+
+                            <i class="fa-solid fa-user"></i>
+
+                        </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+
+                    <label for="profile_image" class="change-photo-btn">
+
+                    <i class="fa-solid fa-camera"></i>
+
+                    Change Photo
+
+                </label>
+
+
+                    <input type="file" id="profile_image" name="profile_image" accept="image/*" hidden>
+
+                </div>
+
+
+
+                <!-- FULL NAME -->
+
+                <div class="form-group">
+
+                    <label for="fullname">
+
+                    Full Name
+
+                </label>
+
+                    <input type="text" id="fullname" name="fullname" value="{{ user.fullname or '' }}" required>
+
+                </div>
+
+
+
+                <!-- USERNAME -->
+
+                <div class="form-group">
+
+                    <label for="username">
+
+                    Username
+
+                </label>
+
+                    <input type="text" id="username" name="username" value="{{ user.username or '' }}" readonly>
+
+                </div>
+
+
+
+                <!-- EMAIL -->
+
+                <div class="form-group">
+
+                    <label for="email">
+
+                    Email
+
+                </label>
+
+                    <input type="email" id="email" name="email" value="{{ user.email or '' }}" readonly>
+
+                </div>
+
+
+
+                <!-- PHONE -->
+
+                <div class="form-group">
+
+                    <label for="phone">
+
+                    Phone
+
+                </label>
+
+                    <input type="text" id="phone" name="phone" value="{{ user.phone or '' }}" placeholder="Enter phone number">
+
+                </div>
+
+
+
+                <!-- LANGUAGE -->
+
+                <div class="form-group">
+
+                    <label for="language">
+
+                    Preferred Language
+
+                </label>
+
+                    <select id="language" name="language">
+
+
+                    <option value="Python"
+                        {% if user.language == 'Python' %}
+                            selected
+                        {% endif %}>
+                        Python
+                    </option>
+
+
+                    <option value="C"
+                        {% if user.language == 'C' %}
+                            selected
+                        {% endif %}>
+                        C
+                    </option>
+
+
+                    <option value="C++"
+                        {% if user.language == 'C++' %}
+                            selected
+                        {% endif %}>
+                        C++
+                    </option>
+
+
+                    <option value="Java"
+                        {% if user.language == 'Java' %}
+                            selected
+                        {% endif %}>
+                        Java
+                    </option>
+
+
+                </select>
+
+                </div>
+
+
+
+                <!-- BUTTONS -->
+
+                <div class="modal-buttons">
+
+                    <button type="button" class="cancel-btn" id="cancelEdit">
+
+                    Cancel
+
+                </button>
+
+
+                    <button type="submit" class="save-btn">
+
+                    <i class="fa-solid fa-floppy-disk"></i>
+
+                    Save Changes
+
+                </button>
+
+                </div>
+
+
+            </form>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- JAVASCRIPT -->
+
+    <script src="{{ url_for('static', filename='profile.js') }}"></script>
+
+
+</body>
+
+</html>

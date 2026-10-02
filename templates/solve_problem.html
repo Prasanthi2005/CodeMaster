@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CodeMaster | {{ problem.title }}</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='solve_problem.css') }}">
+</head>
+
+<body>
+
+    <!-- Problem ID -->
+    <input type="hidden" id="problemId" value="{{ problem.id }}">
+
+    <!-- Solved status from DATABASE -->
+    <input type="hidden" id="isSolved" value="{{ 'true' if is_solved else 'false' }}">
+
+    <div class="solve-container">
+
+        <!-- =========================================
+             PROBLEM PANEL
+        ========================================== -->
+
+        <div class="problem-panel">
+
+            <a href="{{ url_for('problems') }}" class="back-btn">
+                ← Back to Problems
+            </a>
+
+            <h1 class="problem-title">
+                {{ problem.title }}
+            </h1>
+
+            <div class="badges">
+
+                <span class="difficulty {{ problem.difficulty|lower }}">
+                    {{ problem.difficulty }}
+                </span>
+
+                <span class="category">
+                    {{ problem.category }}
+                </span>
+
+            </div>
+
+            <h2>Problem</h2>
+
+            <p class="problem-description">
+                {{ problem.description }}
+            </p>
+
+            <h2>Example</h2>
+
+            <div class="example">
+
+                <div class="example-section">
+
+                    <strong>Input:</strong>
+
+                    <pre>{{
+                        problem.example_input
+                        if problem.example_input
+                        else '[2, 7, 11, 15], target = 9'
+                    }}</pre>
+
+                </div>
+
+                <div class="example-section">
+
+                    <strong>Output:</strong>
+
+                    <pre>{{
+                        problem.example_output
+                        if problem.example_output
+                        else '[0, 1]'
+                    }}</pre>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================================
+             CODE PANEL
+        ========================================== -->
+
+        <div class="code-panel">
+
+            <div class="code-header">
+
+                <h2>Write Your Solution</h2>
+
+                <select id="languageSelect" name="language">
+    <option value="python">Python</option>
+    <option value="c">C</option>
+    <option value="cpp">C++</option>
+    <option value="java">Java</option>
+</select>
+            </div>
+
+
+            <!-- =========================================
+                 CODE EDITOR
+            ========================================== -->
+
+            <textarea id="codeEditor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="Write your solution here...">{{ saved_code|default('', true) }}</textarea>
+
+            <!-- =========================================
+                 BUTTONS
+            ========================================== -->
+
+            <div class="editor-controls">
+
+                <button id="submitButton" type="button" class="submit-btn">
+
+                    Submit Solution
+
+                </button>
+
+                <button id="clearButton" type="button" class="clear-btn">
+
+                    Clear
+
+                </button>
+
+            </div>
+
+
+            <!-- RESULT -->
+
+            <div id="result" class="result">
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script src="{{ url_for('static', filename='solve_problem.js') }}">
+    </script>
+
+</body>
+
+</html>

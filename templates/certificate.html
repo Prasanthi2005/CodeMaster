@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CodeMaster | Certificates</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='certificate.css') }}">
+
+</head>
+
+<body>
+
+    <div class="certificate-page">
+
+        <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+        <aside class="sidebar">
+
+            <div class="brand">
+
+                <div class="brand-code">
+                    &lt;/&gt;
+                </div>
+
+                <div>
+                    <span>Code</span><strong>Master</strong>
+
+                    <small>
+                    LEARN • PRACTICE • ACHIEVE
+                </small>
+                </div>
+
+            </div>
+
+
+            <nav class="navigation">
+
+                <a href="{{ url_for('dashboard') }}">
+                🏠
+                <span>Dashboard</span>
+            </a>
+
+                <a href="{{ url_for('problems') }}">
+                💻
+                <span>Problems</span>
+            </a>
+
+                <a href="{{ url_for('profile') }}">
+                👤
+                <span>Profile</span>
+            </a>
+
+                <a href="{{ url_for('certificate') }}" class="active">
+                🏆
+                <span>Certificates</span>
+            </a>
+
+            </nav>
+
+        </aside>
+
+
+        <!-- =====================================================
+         MAIN
+    ====================================================== -->
+
+        <main class="main-content">
+
+            <!-- HEADER -->
+
+            <section class="page-header">
+
+                <div>
+
+                    <div class="eyebrow">
+                        CODEMASTER ACHIEVEMENTS
+                    </div>
+
+                    <h1>
+                        Your Certificates
+                    </h1>
+
+                    <p>
+                        Earn a professional certificate by completing 135 unique coding problems in a programming language.
+                    </p>
+
+                </div>
+
+                <div class="header-badge">
+                    🏆
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+             WELCOME CARD
+        ================================================== -->
+
+            <section class="welcome-card">
+
+                <div class="welcome-icon">
+                    ✦
+                </div>
+
+                <div>
+
+                    <span class="welcome-label">
+                    CERTIFICATION CENTER
+                </span>
+
+                    <h2>
+                        Keep building. Keep achieving.
+                    </h2>
+
+                    <p>
+                        Complete 135 problems in any programming language to unlock its official CodeMaster certificate.
+                    </p>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+             CERTIFICATE GRID
+        ================================================== -->
+
+            <section class="certificate-grid">
+
+
+                <!-- =================================================
+                 PYTHON
+            ================================================== -->
+
+                <article class="certificate-card
+                {% if progress.get('python', 0) >= 135 %}
+                    unlocked
+                {% else %}
+                    locked
+                {% endif %}
+            ">
+
+                    <div class="language-icon python">
+                        PY
+                    </div>
+
+                    <div class="certificate-details">
+
+                        <div class="card-top">
+
+                            <div>
+
+                                <span class="card-category">
+                                PROGRAMMING LANGUAGE
+                            </span>
+
+                                <h3>
+                                    Python Programming
+                                </h3>
+
+                            </div>
+
+                            {% if progress.get('python', 0) >= 135 %}
+
+                            <span class="status unlocked-status">
+                                ✓ Completed
+                            </span> {% else %}
+
+                            <span class="status locked-status">
+                                🔒 Locked
+                            </span> {% endif %}
+
+                        </div>
+
+
+                        <div class="progress-info">
+
+                            <span>
+                            Progress
+                        </span>
+
+                            <strong>
+                            {{ progress.get('python', 0) }}/135
+                        </strong>
+
+                        </div>
+
+                        <div class="progress-bar">
+
+                            <span style="
+                                width:
+                                {{ [progress.get('python', 0), 135]|min / 135 * 100 }}%;
+                            "></span>
+
+                        </div>
+
+
+                        {% if progress.get('python', 0) >= 135 %}
+
+                        <div class="certificate-action">
+
+                            <div>
+                                <small>
+                                    Official certificate ready
+                                </small>
+
+                                <strong>
+                                    Python Certificate
+                                </strong>
+                            </div>
+
+                            <a href="{{ url_for(
+                                    'download_language_certificate',
+                                    language='python'
+                                ) }}" class="download-btn" data-language="Python">
+                                <span>↓</span> Download Certificate
+                            </a>
+
+                        </div>
+
+                        {% else %}
+
+                        <div class="locked-message">
+
+                            <span>🔒</span>
+
+                            <div>
+
+                                <strong>
+                                    Certificate Locked
+                                </strong>
+
+                                <small>
+                                    Complete
+                                    {{ 135 - progress.get('python', 0) }}
+                                    more Python problems.
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                        {% endif %}
+
+                    </div>
+
+                </article>
+
+
+                <!-- =================================================
+                 JAVA
+            ================================================== -->
+
+                <article class="certificate-card
+                {% if progress.get('java', 0) >= 135 %}
+                    unlocked
+                {% else %}
+                    locked
+                {% endif %}
+            ">
+
+                    <div class="language-icon java">
+                        JV
+                    </div>
+
+                    <div class="certificate-details">
+
+                        <div class="card-top">
+
+                            <div>
+
+                                <span class="card-category">
+                                PROGRAMMING LANGUAGE
+                            </span>
+
+                                <h3>
+                                    Java Programming
+                                </h3>
+
+                            </div>
+
+                            {% if progress.get('java', 0) >= 135 %}
+
+                            <span class="status unlocked-status">
+                                ✓ Completed
+                            </span> {% else %}
+
+                            <span class="status locked-status">
+                                🔒 Locked
+                            </span> {% endif %}
+
+                        </div>
+
+
+                        <div class="progress-info">
+
+                            <span>
+                            Progress
+                        </span>
+
+                            <strong>
+                            {{ progress.get('java', 0) }}/135
+                        </strong>
+
+                        </div>
+
+                        <div class="progress-bar">
+
+                            <span style="
+                                width:
+                                {{ [progress.get('java', 0), 135]|min / 135 * 100 }}%;
+                            "></span>
+
+                        </div>
+
+
+                        {% if progress.get('java', 0) >= 135 %}
+
+                        <div class="certificate-action">
+
+                            <div>
+                                <small>
+                                    Official certificate ready
+                                </small>
+
+                                <strong>
+                                    Java Certificate
+                                </strong>
+                            </div>
+
+                            <a href="{{ url_for(
+                                    'download_language_certificate',
+                                    language='java'
+                                ) }}" class="download-btn" data-language="Java">
+                                <span>↓</span> Download Certificate
+                            </a>
+
+                        </div>
+
+                        {% else %}
+
+                        <div class="locked-message">
+
+                            <span>🔒</span>
+
+                            <div>
+
+                                <strong>
+                                    Certificate Locked
+                                </strong>
+
+                                <small>
+                                    Complete
+                                    {{ 135 - progress.get('java', 0) }}
+                                    more Java problems.
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                        {% endif %}
+
+                    </div>
+
+                </article>
+
+
+                <!-- =================================================
+                 C++
+            ================================================== -->
+
+                <article class="certificate-card
+                {% if progress.get('cpp', 0) >= 135 %}
+                    unlocked
+                {% else %}
+                    locked
+                {% endif %}
+            ">
+
+                    <div class="language-icon cpp">
+                        C++
+                    </div>
+
+                    <div class="certificate-details">
+
+                        <div class="card-top">
+
+                            <div>
+
+                                <span class="card-category">
+                                PROGRAMMING LANGUAGE
+                            </span>
+
+                                <h3>
+                                    C++ Programming
+                                </h3>
+
+                            </div>
+
+                            {% if progress.get('cpp', 0) >= 135 %}
+
+                            <span class="status unlocked-status">
+                                ✓ Completed
+                            </span> {% else %}
+
+                            <span class="status locked-status">
+                                🔒 Locked
+                            </span> {% endif %}
+
+                        </div>
+
+
+                        <div class="progress-info">
+
+                            <span>
+                            Progress
+                        </span>
+
+                            <strong>
+                            {{ progress.get('cpp', 0) }}/135
+                        </strong>
+
+                        </div>
+
+                        <div class="progress-bar">
+
+                            <span style="
+                                width:
+                                {{ [progress.get('cpp', 0), 135]|min / 135 * 100 }}%;
+                            "></span>
+
+                        </div>
+
+
+                        {% if progress.get('cpp', 0) >= 135 %}
+
+                        <div class="certificate-action">
+
+                            <div>
+                                <small>
+                                    Official certificate ready
+                                </small>
+
+                                <strong>
+                                    C++ Certificate
+                                </strong>
+                            </div>
+
+                            <a href="{{ url_for(
+                                    'download_language_certificate',
+                                    language='cpp'
+                                ) }}" class="download-btn" data-language="C++">
+                                <span>↓</span> Download Certificate
+                            </a>
+
+                        </div>
+
+                        {% else %}
+
+                        <div class="locked-message">
+
+                            <span>🔒</span>
+
+                            <div>
+
+                                <strong>
+                                    Certificate Locked
+                                </strong>
+
+                                <small>
+                                    Complete
+                                    {{ 135 - progress.get('cpp', 0) }}
+                                    more C++ problems.
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                        {% endif %}
+
+                    </div>
+
+                </article>
+
+
+                <!-- =================================================
+                 C
+            ================================================== -->
+
+                <article class="certificate-card
+                {% if progress.get('c', 0) >= 135 %}
+                    unlocked
+                {% else %}
+                    locked
+                {% endif %}
+            ">
+
+                    <div class="language-icon c">
+                        C
+                    </div>
+
+                    <div class="certificate-details">
+
+                        <div class="card-top">
+
+                            <div>
+
+                                <span class="card-category">
+                                PROGRAMMING LANGUAGE
+                            </span>
+
+                                <h3>
+                                    C Programming
+                                </h3>
+
+                            </div>
+
+                            {% if progress.get('c', 0) >= 135 %}
+
+                            <span class="status unlocked-status">
+                                ✓ Completed
+                            </span> {% else %}
+
+                            <span class="status locked-status">
+                                🔒 Locked
+                            </span> {% endif %}
+
+                        </div>
+
+
+                        <div class="progress-info">
+
+                            <span>
+                            Progress
+                        </span>
+
+                            <strong>
+                            {{ progress.get('c', 0) }}/135
+                        </strong>
+
+                        </div>
+
+                        <div class="progress-bar">
+
+                            <span style="
+                                width:
+                                {{ [progress.get('c', 0), 135]|min / 135 * 100 }}%;
+                            "></span>
+
+                        </div>
+
+
+                        {% if progress.get('c', 0) >= 135 %}
+
+                        <div class="certificate-action">
+
+                            <div>
+                                <small>
+                                    Official certificate ready
+                                </small>
+
+                                <strong>
+                                    C Certificate
+                                </strong>
+                            </div>
+
+                            <a href="{{ url_for(
+                                    'download_language_certificate',
+                                    language='c'
+                                ) }}" class="download-btn" data-language="C">
+                                <span>↓</span> Download Certificate
+                            </a>
+
+                        </div>
+
+                        {% else %}
+
+                        <div class="locked-message">
+
+                            <span>🔒</span>
+
+                            <div>
+
+                                <strong>
+                                    Certificate Locked
+                                </strong>
+
+                                <small>
+                                    Complete
+                                    {{ 135 - progress.get('c', 0) }}
+                                    more C problems.
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                        {% endif %}
+
+                    </div>
+
+                </article>
+
+            </section>
+
+
+            <!-- =================================================
+             OVERALL
+        ================================================== -->
+
+            <section class="overall-card">
+
+                <div class="overall-left">
+
+                    <div class="overall-icon">
+                        🏆
+                    </div>
+
+                    <div>
+
+                        <span>
+                        TOTAL PROGRESS
+                    </span>
+
+                        <h3>
+                            {{ total_solved }} unique problems solved
+                        </h3>
+
+                    </div>
+
+                </div>
+
+                <div class="overall-number">
+
+                    {{ total_solved }}
+
+                    <small>
+                    problems
+                </small>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <script src="{{ url_for('static', filename='certificate.js') }}"></script>
+
+</body>
+
+</html>

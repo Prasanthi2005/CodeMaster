@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CodeMaster - Contests</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='contest.css') }}">
+</head>
+
+<body>
+
+    <div class="app-layout">
+
+        <!-- ================= SIDEBAR ================= -->
+
+        <aside class="sidebar">
+
+            <div class="brand">
+                <div class="brand-icon">&lt;/&gt;</div>
+                <div class="brand-name">CodeMaster</div>
+            </div>
+
+            <div class="sidebar-menu">
+
+                <a href="/dashboard" class="menu-item">
+                    <span class="menu-icon">⌂</span>
+                    <span>Dashboard</span>
+                </a>
+
+                <a href="/problems" class="menu-item">
+                    <span class="menu-icon">☷</span>
+                    <span>Problems</span>
+                </a>
+
+                <a href="/editor" class="menu-item">
+                    <span class="menu-icon">▣</span>
+                    <span>Code Editor</span>
+                </a>
+
+                <a href="/leaderboard" class="menu-item">
+                    <span class="menu-icon">♟</span>
+                    <span>Leaderboard</span>
+                </a>
+
+                <a href="/contests" class="menu-item active">
+                    <span class="menu-icon">🏆</span>
+                    <span>Contests</span>
+                </a>
+
+                <a href="/profile" class="menu-item">
+                    <span class="menu-icon">♟</span>
+                    <span>Profile</span>
+                </a>
+
+                <a href="/certificates" class="menu-item">
+                    <span class="menu-icon">✦</span>
+                    <span>Certificates</span>
+                </a>
+
+            </div>
+
+            <div class="sidebar-bottom">
+
+                <a href="/logout" class="menu-item logout">
+                    <span class="menu-icon">↪</span>
+                    <span>Logout</span>
+                </a>
+
+            </div>
+
+        </aside>
+
+
+        <!-- ================= MAIN ================= -->
+
+        <main class="main-content">
+
+            <!-- Header -->
+
+            <section class="page-header">
+
+                <div>
+                    <h1>
+                        <span class="header-trophy">🏆</span> Coding Contests
+                    </h1>
+
+                    <p>
+                        Compete, solve problems and climb the leaderboard.
+                    </p>
+                </div>
+
+                <div class="live-indicator">
+                    <span class="live-dot"></span>
+                    <span id="liveHeaderCount">0</span> Live Now
+                </div>
+
+            </section>
+
+
+            <!-- ================= STATS ================= -->
+
+            <section class="stats-grid">
+
+                <!-- Total -->
+
+                <div class="stat-card">
+
+                    <div class="stat-icon total-icon">
+                        🏆
+                    </div>
+
+                    <div class="stat-content">
+                        <span>Total Contests</span>
+                        <strong id="totalContests">0</strong>
+                    </div>
+
+                </div>
+
+
+                <!-- Live -->
+
+                <div class="stat-card">
+
+                    <div class="stat-icon live-icon">
+                        <span class="small-live-dot"></span>
+                    </div>
+
+                    <div class="stat-content">
+                        <span>Live Now</span>
+                        <strong id="liveContests">0</strong>
+                    </div>
+
+                </div>
+
+
+                <!-- Upcoming -->
+
+                <div class="stat-card">
+
+                    <div class="stat-icon upcoming-icon">
+                        ◷
+                    </div>
+
+                    <div class="stat-content">
+                        <span>Upcoming</span>
+                        <strong id="upcomingContests">0</strong>
+                    </div>
+
+                </div>
+
+
+                <!-- Finished -->
+
+                <div class="stat-card">
+
+                    <div class="stat-icon finished-icon">
+                        ✓
+                    </div>
+
+                    <div class="stat-content">
+                        <span>Finished</span>
+                        <strong id="finishedContests">0</strong>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ================= FILTER ================= -->
+
+            <section class="toolbar">
+
+                <div class="filter-buttons">
+
+                    <button class="filter-btn active" data-filter="all">
+                    All
+                </button>
+
+                    <button class="filter-btn" data-filter="live">
+                    Live
+                </button>
+
+                    <button class="filter-btn" data-filter="upcoming">
+                    Upcoming
+                </button>
+
+                    <button class="filter-btn" data-filter="finished">
+                    Finished
+                </button>
+
+                </div>
+
+
+                <div class="toolbar-right">
+
+                    <div class="search-box">
+
+                        <span class="search-icon">⌕</span>
+
+                        <input type="text" id="searchInput" placeholder="Search contests..." autocomplete="off">
+
+                    </div>
+
+                    <div class="realtime-status">
+                        <span></span> Real-time
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ================= CONTEST LIST ================= -->
+
+            <section id="contestGrid" class="contest-grid">
+
+                <!-- JS renders contests here -->
+
+            </section>
+
+
+            <!-- ================= EMPTY ================= -->
+
+            <div id="emptyState" class="empty-state">
+
+                <div class="empty-icon">
+                    🏆
+                </div>
+
+                <h2>No contests found</h2>
+
+                <p>
+                    There are no contests matching your search.
+                </p>
+
+            </div>
+
+        </main>
+
+    </div>
+
+
+    <!-- ================= MODAL ================= -->
+
+    <div id="contestModal" class="modal">
+
+        <div class="modal-overlay"></div>
+
+        <div class="modal-content">
+
+            <button class="modal-close" id="closeModal">
+            ×
+        </button>
+
+            <div id="modalBody"></div>
+
+        </div>
+
+    </div>
+
+
+    <script src="{{ url_for('static', filename='contest.js') }}"></script>
+
+</body>
+
+</html>
