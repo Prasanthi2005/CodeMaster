@@ -706,7 +706,7 @@ Set required environment variables inside the deployment platform.
 ---
 ## 🏠 Dashboard
 
-![CodeMaster Dashboard](screenshots/dashboard(2).png)
+![CodeMaster Dashboard](screenshots/dash.png)
 
 ---
 
@@ -742,7 +742,7 @@ Set required environment variables inside the deployment platform.
 
 ## 👤 User Profile
 
-![Profile](screenshots/profile(2).png)
+![Profile](screenshots/prfile.png)
 
 ---
 ## 🏠 certification
