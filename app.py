@@ -238,6 +238,8 @@ def get_user_progress(user_id):
 # ==========================================
 
 def create_tables():
+    ensure_user_solved_problems_table()
+    ensure_user_problem_codes_table()
 
     conn = get_db()
     cursor = conn.cursor()
@@ -6622,23 +6624,25 @@ def submit_solution():
 # ============================================================
 # CODEMASTER DATABASE INITIALIZATION
 # ============================================================
+# Initialize Database
+# ============================================================
+
+# CODEMASTER DATABASE INITIALIZATION
+
 create_contest_tables()
-with app.app_context():
 
-    print("=" * 60)
+try:
     print("Initializing CodeMaster database...")
-    print("=" * 60)
 
-    # Main application tables
     create_tables()
 
-    # Contest tables + migrations
-   
-    print("=" * 60)
+    ensure_user_solved_problems_table()
+    ensure_user_problem_codes_table()
+
     print("CodeMaster database initialization completed.")
-    print("=" * 60)
 
-
+except Exception as e:
+    print("Database initialization error:", e)
 # ============================================================
 # START SERVER
 # ============================================================
