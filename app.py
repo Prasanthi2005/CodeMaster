@@ -954,6 +954,7 @@ def contests():
     refresh_contest_status()
     ensure_live_contests()
     ensure_upcoming_contest()
+    ensure_contest_display_set()
 
     status_filter = request.args.get("status", "").strip().lower()
 
@@ -1024,6 +1025,7 @@ def api_contests():
     refresh_contest_status()
     ensure_live_contests()
     ensure_upcoming_contest()
+    ensure_contest_display_set()
 
     conn = get_db_connection()
 
@@ -6368,6 +6370,117 @@ def submit_solution():
 
 
 
+# ============================================================
+# KEEP THE CONTEST PAGE CONSISTENT ON LOCAL + RENDER
+# ============================================================
+def ensure_contest_display_set():
+    """Ensure the contest page always has 3 LIVE, 2 UPCOMING and 1 FINISHED contests.
+
+    Existing contest rows are reused so registrations/problems are not needlessly lost.
+    Missing rows are created and every contest receives its problem set.
+    """
+    ensure_contest_table()
+    create_contest_tables()
+
+    conn = get_db_connection()
+    try:
+        now = datetime.now()
+        rows = conn.execute(
+            "SELECT id FROM contests ORDER BY id ASC"
+        ).fetchall()
+        ids = [row["id"] for row in rows]
+
+        target_titles = [
+            "Weekly Coding Challenge",
+            "CodeMaster Weekly Arena",
+            "Python Speed Challenge",
+            "Monthly Challenge",
+            "Data Structures Challenge",
+            "Algorithm Contest",
+        ]
+
+        # Create enough rows to reach exactly six display contests.
+        while len(ids) < 6:
+            idx = len(ids)
+            title = target_titles[idx]
+            cursor = conn.execute(
+                """
+                INSERT INTO contests
+                (title, name, description, duration, start_time, end_time, status, participants)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    title,
+                    title,
+                    "Solve coding problems and compete on CodeMaster.",
+                    120,
+                    now.strftime("%Y-%m-%d %H:%M:%S"),
+                    now.strftime("%Y-%m-%d %H:%M:%S"),
+                    "finished",
+                    0,
+                ),
+            )
+            conn.commit()
+            ids.append(cursor.lastrowid)
+
+        # Keep the first six contests as the public contest set.
+        ids = ids[:6]
+        schedules = [
+            # 1-3: LIVE
+            ("Weekly Coding Challenge", "Solve problems and climb the leaderboard.", 120,
+             now - timedelta(minutes=30), now + timedelta(hours=1, minutes=30), "live", 1250),
+            ("CodeMaster Weekly Arena", "A fast paced programming contest for CodeMaster users.", 80,
+             now - timedelta(minutes=20), now + timedelta(minutes=20), "live", 980),
+            ("Python Speed Challenge", "Solve Python programming challenges against the clock.", 130,
+             now - timedelta(minutes=10), now + timedelta(hours=1, minutes=20), "live", 620),
+            # 4-5: UPCOMING
+            ("Monthly Challenge", "Solve challenging programming problems in our monthly contest.", 180,
+             now + timedelta(hours=1, minutes=20), now + timedelta(hours=4, minutes=20), "upcoming", 850),
+            ("Data Structures Challenge", "Challenge yourself with arrays, trees, graphs and algorithms.", 150,
+             now + timedelta(hours=4), now + timedelta(hours=6, minutes=30), "upcoming", 540),
+            # 6: FINISHED
+            ("Algorithm Contest", "Test your algorithmic thinking and problem solving skills.", 180,
+             now - timedelta(days=1, hours=3), now - timedelta(days=1), "finished", 1600),
+        ]
+
+        for contest_id, data in zip(ids, schedules):
+            title, description, duration, start_time, end_time, status, participants = data
+            conn.execute(
+                """
+                UPDATE contests
+                SET title = ?,
+                    name = ?,
+                    description = ?,
+                    duration = ?,
+                    start_time = ?,
+                    end_time = ?,
+                    status = ?,
+                    participants = ?
+                WHERE id = ?
+                """,
+                (
+                    title,
+                    title,
+                    description,
+                    duration,
+                    start_time.strftime("%Y-%m-%d %H:%M:%S"),
+                    end_time.strftime("%Y-%m-%d %H:%M:%S"),
+                    status,
+                    participants,
+                    contest_id,
+                ),
+            )
+
+        conn.commit()
+
+    finally:
+        conn.close()
+
+    # Every contest must have its five contest problems.
+    for contest_id in ids:
+        ensure_contest_problems(contest_id)
+
+
 # ==========================================
 # Initialize Database
 # ==========================================
@@ -6391,6 +6504,7 @@ try:
     refresh_contest_status()
     ensure_live_contests()
     ensure_upcoming_contest()
+    ensure_contest_display_set()
 
     print("CodeMaster database initialization completed.")
     print("=" * 60)
@@ -6411,6 +6525,7 @@ if __name__ == "__main__":
     refresh_contest_status()
     ensure_live_contests()
     ensure_upcoming_contest()
+    ensure_contest_display_set()
    
     print("=" * 60)
     print("🚀 CodeMaster Compiler Server Started")
