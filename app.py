@@ -87,8 +87,14 @@ app.config.from_object(Config)
 app.config["MAIL_SERVER"] = "smtp.gmail.com"
 app.config["MAIL_PORT"] = 587
 app.config["MAIL_USE_TLS"] = True
-app.config["MAIL_USERNAME"] = "prasanthia06@gmail.com"
-app.config["MAIL_PASSWORD"] = "rabdlglgyqsxymfp"
+app.config["MAIL_USERNAME"] = os.getenv(
+    "MAIL_USERNAME",
+    app.config.get("MAIL_USERNAME", "")
+)
+app.config["MAIL_PASSWORD"] = os.getenv(
+    "MAIL_PASSWORD",
+    app.config.get("MAIL_PASSWORD", "")
+)
 
 mail = Mail(app)
 
@@ -237,75 +243,159 @@ def get_user_progress(user_id):
 # Create Users Table
 # ==========================================
 
+def _ensure_column(conn, table_name, column_name, column_definition):
+    """Add a SQLite column only when it is missing."""
+    columns = {
+        row[1]
+        for row in conn.execute(f"PRAGMA table_info({table_name})").fetchall()
+    }
+
+    if column_name not in columns:
+        conn.execute(
+            f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_definition}"
+        )
+
+
 def create_tables():
+    """Create CodeMaster tables and migrate older SQLite databases safely."""
+
+    # These helpers create tables that are required by the dashboard/problems.
     ensure_user_solved_problems_table()
     ensure_user_problem_codes_table()
 
     conn = get_db()
-    cursor = conn.cursor()
 
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS users(
+    try:
+        cursor = conn.cursor()
 
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                fullname TEXT NOT NULL,
+                email TEXT UNIQUE NOT NULL,
+                phone TEXT,
+                username TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL,
+                language TEXT,
+                score INTEGER DEFAULT 0,
+                solved INTEGER DEFAULT 0,
+                rating INTEGER DEFAULT 0,
+                profile_image TEXT
+            )
+        """)
 
-        fullname TEXT NOT NULL,
+        # IMPORTANT: Render may already have an older users table.
+        # CREATE TABLE IF NOT EXISTS does not modify an existing table,
+        # so missing columns must be migrated explicitly.
+        migrations = {
+            "phone": "TEXT",
+            "username": "TEXT",
+            "language": "TEXT",
+            "score": "INTEGER DEFAULT 0",
+            "solved": "INTEGER DEFAULT 0",
+            "rating": "INTEGER DEFAULT 0",
+            "profile_image": "TEXT",
+        }
 
-        email TEXT UNIQUE NOT NULL,
+        for column, definition in migrations.items():
+            try:
+                _ensure_column(conn, "users", column, definition)
+            except sqlite3.OperationalError as exc:
+                print(f"USERS MIGRATION SKIPPED ({column}):", exc)
 
-        phone TEXT,
+        # Older databases can contain NULL rating values. Keep the real
+        # rating calculation based on solved problems; this only normalizes
+        # the stored legacy value.
+        conn.execute("UPDATE users SET rating = COALESCE(rating, 0)")
 
-        username TEXT UNIQUE NOT NULL,
+        conn.commit()
 
-        password TEXT NOT NULL,
+        print("Users table: READY")
+        print("Users profile_image migration: READY")
 
-        language TEXT,
+    except Exception:
+        conn.rollback()
+        raise
 
-        score INTEGER DEFAULT 0,
-
-        solved INTEGER DEFAULT 0,
-
-        rating INTEGER DEFAULT 0
-
-    )
-    """)
+    finally:
+        conn.close()
 
 
-    # =========================
-    # USERS TABLE
-    # =========================
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            fullname TEXT NOT NULL,
-            email TEXT UNIQUE NOT NULL,
-            phone TEXT,
-            username TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL,
-            language TEXT,
-            score INTEGER DEFAULT 0,
-            solved INTEGER DEFAULT 0,
-            rating INTEGER DEFAULT 1000
-        )
-    """)
-
-    conn.commit()
-    conn.close()
 def create_contest_tables():
+    """Create all contest-related tables used by the API and UI."""
 
-    db = get_db()
+    conn = get_db_connection()
 
-    db.execute("""
-        CREATE TABLE IF NOT EXISTS contest_registrations (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            contest_id INTEGER NOT NULL,
-            user_id INTEGER NOT NULL,
-            registered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE(contest_id, user_id)
-        )
-    """)
+    try:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS contest_registrations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                contest_id INTEGER NOT NULL,
+                user_id INTEGER NOT NULL,
+                registered_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(contest_id, user_id)
+            )
+        """)
 
-    db.commit()
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS contest_problems (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                contest_id INTEGER NOT NULL,
+                problem_id INTEGER NOT NULL,
+                points INTEGER DEFAULT 10,
+                UNIQUE(contest_id, problem_id)
+            )
+        """)
+
+        # Migrate older contest_problems tables that do not have points.
+        try:
+            _ensure_column(conn, "contest_problems", "points", "INTEGER DEFAULT 10")
+        except sqlite3.OperationalError as exc:
+            print("CONTEST PROBLEMS MIGRATION:", exc)
+
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS contest_attempts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                contest_id INTEGER NOT NULL,
+                user_id INTEGER NOT NULL,
+                problem_id INTEGER NOT NULL,
+                language TEXT NOT NULL,
+                status TEXT NOT NULL,
+                attempted_at TEXT DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS contest_solves (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                contest_id INTEGER NOT NULL,
+                user_id INTEGER NOT NULL,
+                problem_id INTEGER NOT NULL,
+                solved_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(contest_id, user_id, problem_id)
+            )
+        """)
+
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS contest_submissions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                contest_id INTEGER NOT NULL,
+                user_id INTEGER NOT NULL,
+                problem_id INTEGER NOT NULL,
+                language TEXT NOT NULL,
+                code TEXT,
+                status TEXT NOT NULL,
+                submitted_at TEXT DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        conn.commit()
+        print("Contest tables: READY")
+
+    finally:
+        conn.close()
+
+
 # ============================================================
 # CODEMASTER CONTEST SYSTEM
 # LIVE / UPCOMING / FINISHED
@@ -859,6 +949,11 @@ def contests():
     if not session.get("logged_in"):
         return redirect("/login")
 
+    ensure_contest_table()
+    create_contest_tables()
+    refresh_contest_status()
+    ensure_live_contests()
+
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
 
@@ -906,8 +1001,10 @@ def contests():
 @app.route("/api/contests", methods=["GET"])
 def api_contests():
 
+    ensure_contest_table()
+    create_contest_tables()
     refresh_contest_status()
-
+    ensure_live_contests()
 
     conn = get_db_connection()
 
@@ -1496,6 +1593,8 @@ def login():
 def register():
 
     if request.method == "POST":
+        # Render may have an older SQLite schema. Ensure migrations before insert.
+        create_tables()
 
         fullname = request.form.get("fullname", "").strip()
         email = request.form.get("email", "").strip()
@@ -1705,59 +1804,88 @@ def register():
 
 
     return render_template("register.html")
+def ensure_contest_problems(contest_id):
+    """Ensure every contest has the first five CodeMaster problems."""
+    conn = get_db_connection()
+    try:
+        problem_ids = [1, 2, 3, 4, 5]
+        points = {1: 10, 2: 10, 3: 20, 4: 20, 5: 30}
+
+        for problem_id in problem_ids:
+            exists = conn.execute("""
+                SELECT 1
+                FROM problems
+                WHERE id = ?
+                LIMIT 1
+            """, (problem_id,)).fetchone()
+
+            if not exists:
+                continue
+
+            conn.execute("""
+                INSERT OR IGNORE INTO contest_problems
+                (contest_id, problem_id, points)
+                VALUES (?, ?, ?)
+            """, (contest_id, problem_id, points[problem_id]))
+
+        conn.commit()
+    finally:
+        conn.close()
+
+
 def ensure_live_contests():
+    """Keep at least one real-time live contest available on Render."""
+    ensure_contest_table()
+    create_contest_tables()
+    refresh_contest_status()
 
     conn = get_db_connection()
 
     try:
         now = datetime.now()
+        now_text = now.strftime("%Y-%m-%d %H:%M:%S")
 
         live_contests = conn.execute("""
             SELECT id
             FROM contests
-            WHERE status = 'live'
-            AND datetime(start_time) <= datetime(?)
-            AND datetime(end_time) >= datetime(?)
-        """, (
-            now.strftime("%Y-%m-%d %H:%M:%S"),
-            now.strftime("%Y-%m-%d %H:%M:%S")
-        )).fetchall()
+            WHERE datetime(start_time) <= datetime(?)
+              AND datetime(end_time) > datetime(?)
+              AND status = 'live'
+            ORDER BY id DESC
+        """, (now_text, now_text)).fetchall()
 
         if live_contests:
-            return
+            contest_ids = [row["id"] for row in live_contests]
+        else:
+            # No active contest: create a fresh two-hour live contest.
+            start_time = now - timedelta(minutes=10)
+            end_time = now + timedelta(hours=2)
 
-        conn.execute("""
-            INSERT INTO contests
-            (
-                title,
-                name,
-                description,
-                duration,
-                start_time,
-                end_time,
-                status,
-                participants
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            "Weekly Coding Challenge",
-            "Weekly Coding Challenge",
-            "Compete, solve problems and climb the leaderboard.",
-            120,
-            (
-                now - timedelta(minutes=10)
-            ).strftime("%Y-%m-%d %H:%M:%S"),
-            (
-                now + timedelta(hours=2)
-            ).strftime("%Y-%m-%d %H:%M:%S"),
-            "live",
-            0
-        ))
+            cursor = conn.execute("""
+                INSERT INTO contests
+                (title, name, description, duration, start_time, end_time, status, participants)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                "CodeMaster Live Challenge",
+                "CodeMaster Live Challenge",
+                "Compete, solve coding problems and climb the CodeMaster leaderboard.",
+                120,
+                start_time.strftime("%Y-%m-%d %H:%M:%S"),
+                end_time.strftime("%Y-%m-%d %H:%M:%S"),
+                "live",
+                0
+            ))
 
-        conn.commit()
+            conn.commit()
+            contest_ids = [cursor.lastrowid]
+
+        for contest_id in contest_ids:
+            ensure_contest_problems(contest_id)
 
     finally:
         conn.close()
+
+
 @app.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
 
@@ -2005,179 +2133,181 @@ def ensure_contest_table():
 # ============================================================
 # DOWNLOAD LANGUAGE CERTIFICATE
 # ============================================================
-@app.route("/api/run-code", methods=["POST"])
-def api_run_code():
-    import os
-    import sys
-    import tempfile
-    import subprocess
+def execute_code_for_platform(code, language, user_input="", timeout=10):
+    """Compile/execute one program using the current server's platform paths."""
+    temp_dir = tempfile.mkdtemp(prefix="codemaster_run_")
 
     try:
-        data = request.get_json(silent=True) or {}
+        language = normalize_language(language)
 
-        code = data.get("code", "")
-        language = str(data.get("language", "python")).lower()
-        user_input = data.get("input", "")
+        if language == "python":
+            source = os.path.join(temp_dir, "main.py")
+            with open(source, "w", encoding="utf-8") as file:
+                file.write(code)
 
-        if not code.strip():
-            return jsonify({
+            result = subprocess.run(
+                [sys.executable, source],
+                input=user_input,
+                cwd=temp_dir,
+                text=True,
+                capture_output=True,
+                timeout=timeout
+            )
+
+        elif language in ("c", "cpp"):
+            compiler = shutil.which("gcc" if language == "c" else "g++")
+            if not compiler:
+                return {
+                    "success": False,
+                    "status": "compiler_unavailable",
+                    "output": "",
+                    "error": (
+                        "C/C++ compiler is not installed on the Render server. "
+                        "Python execution is available. "
+                        "For C/C++ on Render, install gcc/g++ in the service build environment."
+                    )
+                }
+
+            extension = "c" if language == "c" else "cpp"
+            source = os.path.join(temp_dir, "main." + extension)
+            executable = os.path.join(
+                temp_dir,
+                "main.exe" if os.name == "nt" else "main"
+            )
+
+            with open(source, "w", encoding="utf-8") as file:
+                file.write(code)
+
+            compile_command = [compiler, source, "-o", executable]
+            if language == "cpp":
+                compile_command.insert(1, "-std=c++17")
+
+            compile_result = subprocess.run(
+                compile_command,
+                cwd=temp_dir,
+                text=True,
+                capture_output=True,
+                timeout=timeout
+            )
+
+            if compile_result.returncode != 0:
+                return {
+                    "success": False,
+                    "status": "compile_error",
+                    "output": "",
+                    "error": compile_result.stderr or "Compilation failed."
+                }
+
+            run_command = [executable]
+            if os.name != "nt" and not os.access(executable, os.X_OK):
+                os.chmod(executable, os.stat(executable).st_mode | stat.S_IEXEC)
+
+            result = subprocess.run(
+                run_command,
+                input=user_input,
+                cwd=temp_dir,
+                text=True,
+                capture_output=True,
+                timeout=timeout
+            )
+
+        elif language == "java":
+            javac = shutil.which("javac")
+            java = shutil.which("java")
+            if not javac or not java:
+                return {
+                    "success": False,
+                    "status": "compiler_unavailable",
+                    "output": "",
+                    "error": "Java compiler/runtime is not installed on the Render server."
+                }
+
+            source = os.path.join(temp_dir, "Main.java")
+            with open(source, "w", encoding="utf-8") as file:
+                file.write(code)
+
+            compile_result = subprocess.run(
+                [javac, source],
+                cwd=temp_dir,
+                text=True,
+                capture_output=True,
+                timeout=timeout
+            )
+
+            if compile_result.returncode != 0:
+                return {
+                    "success": False,
+                    "status": "compile_error",
+                    "output": "",
+                    "error": compile_result.stderr or "Compilation failed."
+                }
+
+            result = subprocess.run(
+                [java, "-cp", temp_dir, "Main"],
+                input=user_input,
+                cwd=temp_dir,
+                text=True,
+                capture_output=True,
+                timeout=timeout
+            )
+
+        else:
+            return {
                 "success": False,
-                "error": "Code is empty."
-            }), 400
+                "status": "unsupported_language",
+                "output": "",
+                "error": "Unsupported language: " + language
+            }
 
-        with tempfile.TemporaryDirectory() as temp_dir:
+        return {
+            "success": result.returncode == 0,
+            "status": "executed" if result.returncode == 0 else "runtime_error",
+            "output": result.stdout.strip(),
+            "error": result.stderr.strip()
+        }
 
-            if language == "python":
-                filename = os.path.join(
-                    temp_dir,
-                    "main.py"
-                )
+    finally:
+        shutil.rmtree(temp_dir, ignore_errors=True)
 
-                with open(
-                    filename,
-                    "w",
-                    encoding="utf-8"
-                ) as file:
-                    file.write(code)
 
-                result = subprocess.run(
-                    [
-                        sys.executable,
-                        filename
-                    ],
-                    input=user_input,
-                    text=True,
-                    capture_output=True,
-                    timeout=10
-                )
+@app.route("/api/run-code", methods=["POST"])
+def api_run_code():
+    """Run code safely enough for the CodeMaster demo/compiler endpoint."""
+    data = request.get_json(silent=True) or {}
+    code = str(data.get("code", ""))
+    language = normalize_language(data.get("language", "python"))
+    user_input = str(data.get("input", "") or "")
 
-            elif language == "java":
-                filename = os.path.join(
-                    temp_dir,
-                    "Main.java"
-                )
+    if not code.strip():
+        return jsonify({"success": False, "error": "Code is empty."}), 400
 
-                with open(
-                    filename,
-                    "w",
-                    encoding="utf-8"
-                ) as file:
-                    file.write(code)
+    try:
+        result = execute_code_for_platform(
+            code=code,
+            language=language,
+            user_input=user_input,
+            timeout=10
+        )
 
-                compile_result = subprocess.run(
-                    [
-                        "javac",
-                        filename
-                    ],
-                    text=True,
-                    capture_output=True,
-                    timeout=10
-                )
+        if not result["success"]:
+            return jsonify(result), 200
 
-                if compile_result.returncode != 0:
-                    return jsonify({
-                        "success": False,
-                        "error": compile_result.stderr
-                    }), 400
-
-                result = subprocess.run(
-                    [
-                        "java",
-                        "-cp",
-                        temp_dir,
-                        "Main"
-                    ],
-                    input=user_input,
-                    text=True,
-                    capture_output=True,
-                    timeout=10
-                )
-
-            elif language in ("c", "cpp", "c++"):
-
-                extension = (
-                    "cpp"
-                    if language in ("cpp", "c++")
-                    else "c"
-                )
-
-                filename = os.path.join(
-                    temp_dir,
-                    "main." + extension
-                )
-
-                executable = os.path.join(
-                    temp_dir,
-                    "main.exe"
-                )
-
-                with open(
-                    filename,
-                    "w",
-                    encoding="utf-8"
-                ) as file:
-                    file.write(code)
-
-                compiler = (
-                    "g++"
-                    if extension == "cpp"
-                    else "gcc"
-                )
-
-                compile_result = subprocess.run(
-                    [
-                        compiler,
-                        filename,
-                        "-o",
-                        executable
-                    ],
-                    text=True,
-                    capture_output=True,
-                    timeout=10
-                )
-
-                if compile_result.returncode != 0:
-                    return jsonify({
-                        "success": False,
-                        "error": compile_result.stderr
-                    }), 400
-
-                result = subprocess.run(
-                    [executable],
-                    input=user_input,
-                    text=True,
-                    capture_output=True,
-                    timeout=10
-                )
-
-            else:
-                return jsonify({
-                    "success": False,
-                    "error": "Unsupported language."
-                }), 400
-
-            if result.returncode != 0:
-                return jsonify({
-                    "success": False,
-                    "error": result.stderr or "Runtime Error"
-                }), 400
-
-            return jsonify({
-                "success": True,
-                "output": result.stdout.strip()
-            })
+        return jsonify(result), 200
 
     except subprocess.TimeoutExpired:
         return jsonify({
             "success": False,
-            "error": "Time Limit Exceeded"
+            "status": "timeout",
+            "error": "Time Limit Exceeded (10 seconds)"
         }), 408
-
-    except Exception as e:
+    except Exception as exc:
+        print("API RUN CODE ERROR:", repr(exc))
         return jsonify({
             "success": False,
-            "error": str(e)
+            "status": "server_error",
+            "error": str(exc)
         }), 500
+
 
 @app.route(
     "/download-language-certificate/<language>"
@@ -4507,191 +4637,39 @@ def internal_server_error(error):
 # ==========================================
 @app.route("/run", methods=["POST"])
 def run_code():
-
-    data = request.get_json()
-
-    language = data.get("language", "").lower()
-    code = data.get("code", "")
-    user_input = data.get("input", "")
+    data = request.get_json(silent=True) or {}
 
     try:
+        result = execute_code_for_platform(
+            code=str(data.get("code", "")),
+            language=str(data.get("language", "python")),
+            user_input=str(data.get("input", "") or ""),
+            timeout=10
+        )
 
-        # Python
-        if language == "python":
-
-            with tempfile.NamedTemporaryFile(
-                delete=False,
-                suffix=".py",
-                mode="w",
-                encoding="utf-8"
-            ) as f:
-                f.write(code)
-                filename = f.name
-
-            result = subprocess.run(
-                ["python", filename],
-                input=user_input,
-                text=True,
-                capture_output=True,
-                timeout=5
-            )
-
-            os.remove(filename)
-
-            return jsonify({
-                "output": result.stdout,
-                "error": result.stderr
-            })
-
-        # C
-        elif language == "c":
-
-            c_file = "main.c"
-            exe_file = f"{uuid.uuid4().hex}.exe"
-
-            with open(c_file, "w", encoding="utf-8") as f:
-                f.write(code)
-
-            compile_result = subprocess.run(
-                ["gcc", c_file, "-o", exe_file],
-                capture_output=True,
-                text=True
-            )
-
-            if compile_result.returncode != 0:
-                return jsonify({
-                    "output": "",
-                    "error": compile_result.stderr
-                })
-
-            result = subprocess.run(
-                [exe_file],
-                input=user_input,
-                text=True,
-                capture_output=True,
-                timeout=5,
-                shell=True
-            )
-
-            return jsonify({
-                "output": result.stdout,
-                "error": result.stderr
-            })
-        # Java
-        elif language == "java":
-
-            java_file = "Main.java"
-
-            with open(java_file, "w", encoding="utf-8") as f:
-                f.write(code)
-
-            compile_result = subprocess.run(
-                ["javac", java_file],
-                capture_output=True,
-                text=True
-            )
-
-            if compile_result.returncode != 0:
-                return jsonify({
-                    "output": "",
-                    "error": compile_result.stderr
-                })
-
-            result = subprocess.run(
-                ["java", "Main"],
-                input=user_input,
-                text=True,
-                capture_output=True,
-                timeout=5
-            )
-
-            return jsonify({
-                "output": result.stdout,
-                "error": result.stderr
-            })
-
-        # C++
-        elif language == "cpp":
-
-            cpp_file = "main.cpp"
-            exe_file = f"{uuid.uuid4().hex}.exe"
-
-            with open(cpp_file, "w", encoding="utf-8") as f:
-                f.write(code)
-
-            compile_result = subprocess.run(
-                ["g++", cpp_file, "-o", exe_file],
-                capture_output=True,
-                text=True
-            )
-
-            if compile_result.returncode != 0:
-                return jsonify({
-                    "output": "",
-                    "error": compile_result.stderr
-                })
-
-            result = subprocess.run(
-                [exe_file],
-                input=user_input,
-                text=True,
-                capture_output=True,
-                timeout=5,
-                shell=True
-            )
-
-            return jsonify({
-                "output": result.stdout,
-                "error": result.stderr
-            })
-
-        else:
-            return jsonify({
-                "output": "",
-                "error": "Unsupported language"
-            })
+        return jsonify({
+            "output": result.get("output", ""),
+            "error": result.get("error", ""),
+            "success": result.get("success", False),
+            "status": result.get("status", "")
+        }), 200
 
     except subprocess.TimeoutExpired:
         return jsonify({
             "output": "",
-            "error": "Time Limit Exceeded (5 seconds)"
-        })
-
-    except FileNotFoundError as e:
+            "error": "Time Limit Exceeded (10 seconds)",
+            "success": False,
+            "status": "timeout"
+        }), 408
+    except Exception as exc:
+        print("RUN ENDPOINT ERROR:", repr(exc))
         return jsonify({
             "output": "",
-            "error": f"Compiler not found: {str(e)}"
-        })
+            "error": str(exc),
+            "success": False,
+            "status": "server_error"
+        }), 500
 
-    except Exception as e:
-        return jsonify({
-            "output": "",
-            "error": str(e)
-        })
-
-    finally:
-
-        files_to_delete = [
-            "main.c",
-            "Main.java",
-            "Main.class",
-            "main.cpp",
-            "main.exe"
-        ]
-
-        for file in files_to_delete:
-            if os.path.exists(file):
-                try:
-                    os.remove(file)
-                except:
-                    pass
-
-            # ==========================================
-    
-
-# ==========================================
-# Test Mail
-# ==========================================
 
 @app.route("/test-mail")
 def test_mail():
@@ -4861,383 +4839,36 @@ def get_user_code(problem_id):
 
 @app.route("/execute_code", methods=["POST"])
 def execute_code():
-
+    """Compatibility endpoint used by older editor JavaScript."""
     data = request.get_json(silent=True) or {}
 
-    language = str(
-        data.get("language", "python")
-    ).strip().lower()
-
-    code = str(
-        data.get("code", "")
-    )
-
-    user_input = str(
-        data.get("input", "")
-    )
-
-
-    if not code.strip():
-
-        return jsonify({
-            "success": False,
-            "output": "",
-            "error": "Please write your code first."
-        }), 400
-
-
-    temp_dir = None
-
-
     try:
-
-        # ====================================================
-        # PYTHON
-        # ====================================================
-
-        if language in ("python", "py"):
-
-            temp_dir = tempfile.mkdtemp(
-                prefix="codemaster_python_"
-            )
-
-            source_file = os.path.join(
-                temp_dir,
-                "main.py"
-            )
-
-
-            with open(
-                source_file,
-                "w",
-                encoding="utf-8"
-            ) as f:
-
-                f.write(code)
-
-
-            result = subprocess.run(
-                [
-                    sys.executable,
-                    source_file
-                ],
-                input=user_input,
-                text=True,
-                capture_output=True
-                # NO timeout
-            )
-
-
-            return jsonify({
-                "success":
-                    result.returncode == 0,
-
-                "status":
-                    "executed"
-                    if result.returncode == 0
-                    else "runtime_error",
-
-                "output":
-                    result.stdout.strip(),
-
-                "error":
-                    result.stderr.strip()
-            })
-
-
-        # ====================================================
-        # C
-        # ====================================================
-
-        elif language == "c":
-
-            temp_dir = tempfile.mkdtemp(
-                prefix="codemaster_c_"
-            )
-
-            source_file = os.path.join(
-                temp_dir,
-                "main.c"
-            )
-
-            executable_file = os.path.join(
-                temp_dir,
-                "main.exe"
-            )
-
-
-            with open(
-                source_file,
-                "w",
-                encoding="utf-8"
-            ) as f:
-
-                f.write(code)
-
-
-            compile_result = subprocess.run(
-                [
-                    "gcc",
-                    source_file,
-                    "-o",
-                    executable_file
-                ],
-                capture_output=True,
-                text=True
-            )
-
-
-            if compile_result.returncode != 0:
-
-                return jsonify({
-                    "success": False,
-                    "status": "compile_error",
-                    "output": "",
-                    "error":
-                        compile_result.stderr
-                })
-
-
-            result = subprocess.run(
-                [
-                    executable_file
-                ],
-                input=user_input,
-                text=True,
-                capture_output=True
-                # NO timeout
-            )
-
-
-            return jsonify({
-                "success":
-                    result.returncode == 0,
-
-                "status":
-                    "executed"
-                    if result.returncode == 0
-                    else "runtime_error",
-
-                "output":
-                    result.stdout.strip(),
-
-                "error":
-                    result.stderr.strip()
-            })
-
-
-        # ====================================================
-        # C++
-        # ====================================================
-
-        elif language in ("cpp", "c++"):
-
-            temp_dir = tempfile.mkdtemp(
-                prefix="codemaster_cpp_"
-            )
-
-            source_file = os.path.join(
-                temp_dir,
-                "main.cpp"
-            )
-
-            executable_file = os.path.join(
-                temp_dir,
-                "main.exe"
-            )
-
-
-            with open(
-                source_file,
-                "w",
-                encoding="utf-8"
-            ) as f:
-
-                f.write(code)
-
-
-            compile_result = subprocess.run(
-                [
-                    "g++",
-                    source_file,
-                    "-o",
-                    executable_file
-                ],
-                capture_output=True,
-                text=True
-            )
-
-
-            if compile_result.returncode != 0:
-
-                return jsonify({
-                    "success": False,
-                    "status": "compile_error",
-                    "output": "",
-                    "error":
-                        compile_result.stderr
-                })
-
-
-            result = subprocess.run(
-                [
-                    executable_file
-                ],
-                input=user_input,
-                text=True,
-                capture_output=True
-                # NO timeout
-            )
-
-
-            return jsonify({
-                "success":
-                    result.returncode == 0,
-
-                "status":
-                    "executed"
-                    if result.returncode == 0
-                    else "runtime_error",
-
-                "output":
-                    result.stdout.strip(),
-
-                "error":
-                    result.stderr.strip()
-            })
-
-
-        # ====================================================
-        # JAVA
-        # ====================================================
-
-        elif language == "java":
-
-            temp_dir = tempfile.mkdtemp(
-                prefix="codemaster_java_"
-            )
-
-            source_file = os.path.join(
-                temp_dir,
-                "Main.java"
-            )
-
-
-            with open(
-                source_file,
-                "w",
-                encoding="utf-8"
-            ) as f:
-
-                f.write(code)
-
-
-            compile_result = subprocess.run(
-                [
-                    "javac",
-                    source_file
-                ],
-                capture_output=True,
-                text=True
-            )
-
-
-            if compile_result.returncode != 0:
-
-                return jsonify({
-                    "success": False,
-                    "status": "compile_error",
-                    "output": "",
-                    "error":
-                        compile_result.stderr
-                })
-
-
-            result = subprocess.run(
-                [
-                    "java",
-                    "-cp",
-                    temp_dir,
-                    "Main"
-                ],
-                input=user_input,
-                text=True,
-                capture_output=True
-                # NO timeout
-            )
-
-
-            return jsonify({
-                "success":
-                    result.returncode == 0,
-
-                "status":
-                    "executed"
-                    if result.returncode == 0
-                    else "runtime_error",
-
-                "output":
-                    result.stdout.strip(),
-
-                "error":
-                    result.stderr.strip()
-            })
-
-
-        # ====================================================
-        # UNSUPPORTED LANGUAGE
-        # ====================================================
-
+        result = execute_code_for_platform(
+            code=str(data.get("code", "")),
+            language=str(data.get("language", "python")),
+            user_input=str(data.get("input", "") or ""),
+            timeout=10
+        )
+
+        return jsonify(result), 200
+
+    except subprocess.TimeoutExpired:
         return jsonify({
             "success": False,
-            "status": "error",
+            "status": "timeout",
             "output": "",
-            "error":
-                "Unsupported language: " +
-                language
-        }), 400
-
-
-    except FileNotFoundError as e:
-
+            "error": "Time Limit Exceeded (10 seconds)"
+        }), 408
+    except Exception as exc:
+        print("EXECUTE CODE ERROR:", repr(exc))
         return jsonify({
             "success": False,
-            "status": "error",
+            "status": "server_error",
             "output": "",
-            "error":
-                "Compiler/interpreter not found: " +
-                str(e)
+            "error": str(exc)
         }), 500
 
 
-    except Exception as e:
-
-        return jsonify({
-            "success": False,
-            "status": "error",
-            "output": "",
-            "error": str(e)
-        }), 500
-
-
-    finally:
-
-        # ====================================================
-        # DELETE TEMPORARY DIRECTORY
-        # ====================================================
-
-        if temp_dir:
-
-            try:
-
-                shutil.rmtree(
-                    temp_dir,
-                    ignore_errors=True
-                )
-
-            except Exception:
-
-                pass
 @app.route("/clear_user_code", methods=["POST"])
 def clear_user_code():
 
@@ -5953,10 +5584,11 @@ def submit_solution():
             # PARTICIPANT
             # -------------------------------------------------
             cursor.execute("""
-                SELECT *
-                FROM contest_participants
+                SELECT 1
+                FROM contest_registrations
                 WHERE contest_id = ?
                 AND user_id = ?
+                LIMIT 1
             """, (
                 contest_id,
                 user_id
@@ -5976,10 +5608,11 @@ def submit_solution():
             # CONTEST PROBLEM
             # -------------------------------------------------
             cursor.execute("""
-                SELECT points
+                SELECT 1
                 FROM contest_problems
                 WHERE contest_id = ?
                 AND problem_id = ?
+                LIMIT 1
             """, (
                 contest_id,
                 problem_id
@@ -6672,25 +6305,29 @@ def submit_solution():
 # ============================================================
 # CODEMASTER DATABASE INITIALIZATION
 # ============================================================
-# Initialize Database
+# This block MUST run when Gunicorn imports app.py on Render.
+# It is intentionally outside if __name__ == "__main__".
 # ============================================================
 
-# CODEMASTER DATABASE INITIALIZATION
-
-create_contest_tables()
-
 try:
+    print("=" * 60)
     print("Initializing CodeMaster database...")
+    print("=" * 60)
 
     create_tables()
-
-    ensure_user_solved_problems_table()
-    ensure_user_problem_codes_table()
+    ensure_contest_table()
+    create_contest_tables()
+    ensure_contest_registration_table()
+    seed_contests()
+    refresh_contest_status()
+    ensure_live_contests()
 
     print("CodeMaster database initialization completed.")
+    print("=" * 60)
 
-except Exception as e:
-    print("Database initialization error:", e)
+except Exception as initialization_error:
+    print("DATABASE INITIALIZATION ERROR:", repr(initialization_error))
+
 # ============================================================
 # START SERVER
 # ============================================================
@@ -6698,11 +6335,11 @@ except Exception as e:
 if __name__ == "__main__":
     create_tables()
     ensure_contest_table()
+    create_contest_tables()
     ensure_contest_registration_table()
     seed_contests()
-    reset_contests_for_testing()
-    ensure_live_contests()
     refresh_contest_status()
+    ensure_live_contests()
    
     print("=" * 60)
     print("🚀 CodeMaster Compiler Server Started")
@@ -6718,3 +6355,4 @@ if __name__ == "__main__":
         threaded=True,
         use_reloader=False
     )
+
