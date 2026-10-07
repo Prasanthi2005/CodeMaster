@@ -43,7 +43,6 @@ from datetime import datetime
 from database import init_db, seed_problems
 from werkzeug.security import check_password_hash
 from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
 from flask import session
 import smtplib
 import ssl
@@ -148,7 +147,8 @@ google = oauth.register(
     }
 ) 
 
-DATABASE = "database.db"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATABASE = os.path.join(BASE_DIR, "database.db")
 
 
 # ==========================================
@@ -263,6 +263,7 @@ def create_tables():
     # These helpers create tables that are required by the dashboard/problems.
     ensure_user_solved_problems_table()
     ensure_user_problem_codes_table()
+    ensure_user_problem_progress_table()
 
     conn = get_db()
 
@@ -421,9 +422,12 @@ def contest_db():
 # ============================================================
 
 def contest_now():
-    """Return current India time as a naive datetime for contest calculations."""
-    return datetime.now(ZoneInfo("Asia/Kolkata")).replace(tzinfo=None)
-
+    """Return current time in Asia/Kolkata for contest scheduling."""
+    try:
+        from zoneinfo import ZoneInfo
+        return datetime.now(ZoneInfo("Asia/Kolkata"))
+    except Exception:
+        return datetime.now()
 
 # ============================================================
 # CONTEST STATUS
@@ -446,7 +450,7 @@ def get_contest_status(start_time, end_time):
             "%Y-%m-%d %H:%M:%S"
         )
 
-        now = contest_now()
+        now = contest_now().replace(tzinfo=None)
 
         if now < start:
             return "upcoming"
@@ -502,6 +506,26 @@ def ensure_user_solved_problems_table():
 
     finally:
         conn.close()
+def ensure_user_problem_progress_table():
+    """Create the per-user, per-language problem progress table."""
+    conn = sqlite3.connect(DATABASE)
+    try:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS user_problem_progress (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                problem_id INTEGER NOT NULL,
+                language TEXT NOT NULL,
+                solved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(user_id, problem_id, language)
+            )
+        """)
+        conn.commit()
+        print("User problem progress table: READY")
+    finally:
+        conn.close()
+
+
 def ensure_user_problem_codes_table():
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
@@ -542,7 +566,7 @@ def home():
     return render_template("index.html")
 
 def get_db_connection():
-    conn = sqlite3.connect("database.db")
+    conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -567,7 +591,7 @@ def seed_contests():
             return
 
 
-        now = contest_now()
+        now = contest_now().replace(tzinfo=None)
 
 
         # =========================================
@@ -759,7 +783,7 @@ def register_for_contest(
         """, (
             contest_id,
             user_id,
-            contest_now().strftime(
+            datetime.now().strftime(
                 "%Y-%m-%d %H:%M:%S"
             )
         ))
@@ -856,7 +880,7 @@ def refresh_contest_status():
 
     try:
 
-        now = contest_now()
+        now = datetime.now()
 
         rows = conn.execute("""
             SELECT
@@ -1263,8 +1287,8 @@ def google_callback():
             return "Google user information not found", 400
 
         # Google details
-        email = userinfo.get("email")
-        fullname = userinfo.get("name")
+        email = str(userinfo.get("email") or "").strip().lower()
+        fullname = userinfo.get("name") or email.split("@")[0]
         google_id = userinfo.get("sub")
 
         if not email:
@@ -1278,7 +1302,7 @@ def google_callback():
                 """
                 SELECT *
                 FROM users
-                WHERE email = ?
+                WHERE LOWER(email) = LOWER(?)
                 """,
                 (email,)
             ).fetchone()
@@ -1438,7 +1462,7 @@ def login():
             """
             SELECT *
             FROM users
-            WHERE email = ?
+            WHERE LOWER(email) = LOWER(?)
             LIMIT 1
             """,
             (email,)
@@ -1555,6 +1579,7 @@ def login():
         session["username"] = user["username"]
 
         session["email"] = user["email"]
+        session["fullname"] = user["fullname"]
 
         session["user_email"] = user["email"]
 
@@ -1616,7 +1641,7 @@ def register():
         create_tables()
 
         fullname = request.form.get("fullname", "").strip()
-        email = request.form.get("email", "").strip()
+        email = request.form.get("email", "").strip().lower()
         username = request.form.get("username", "").strip()
         phone = request.form.get("phone", "").strip()
         password = request.form.get("password", "").strip()
@@ -1861,7 +1886,7 @@ def ensure_live_contests():
     conn = get_db_connection()
 
     try:
-        now = contest_now()
+        now = datetime.now()
         now_text = now.strftime("%Y-%m-%d %H:%M:%S")
 
         live_contests = conn.execute("""
@@ -1913,7 +1938,7 @@ def ensure_upcoming_contest():
 
     conn = get_db_connection()
     try:
-        now = contest_now()
+        now = datetime.now()
         now_text = now.strftime("%Y-%m-%d %H:%M:%S")
 
         row = conn.execute("""
@@ -1975,7 +2000,7 @@ def forgot_password():
         session['reset_email'] = email
         session['reset_otp'] = otp
         session['reset_otp_expiry'] = (
-            contest_now() + timedelta(seconds=60)
+            datetime.now() + timedelta(seconds=60)
         ).strftime('%Y-%m-%d %H:%M:%S')
 
         print('Generated OTP:', otp)
@@ -2018,7 +2043,7 @@ def resend_otp():
 
         session['reset_otp'] = otp
         session['reset_otp_expiry'] = (
-    contest_now() + timedelta(seconds=60)
+    datetime.now() + timedelta(seconds=60)
 ).strftime('%Y-%m-%d %H:%M:%S')
         msg = Message(
             subject='Your New OTP - CodeMaster',
@@ -5065,7 +5090,7 @@ def reset_contests_for_testing():
 
     try:
 
-        now = contest_now()
+        now = contest_now().replace(tzinfo=None)
 
 
         contests_data = [
@@ -5285,6 +5310,7 @@ def reset_contests_for_testing():
 # SUBMIT SOLUTION
 # =====================================================
 @app.route("/submit_solution", methods=["POST"])
+@app.route("/api/submit-code", methods=["POST"])
 def submit_solution():
 
     temp_dir = None
@@ -5349,6 +5375,16 @@ def submit_solution():
         # DATABASE
         # =====================================================
         conn = get_db_connection()
+
+        # Read the real problem title so the evaluator does not depend only
+        # on a hard-coded numeric ID. This is important when old Render
+        # databases and local databases have different problem ordering.
+        problem_row = conn.execute(
+            "SELECT title FROM problems WHERE id = ? LIMIT 1",
+            (problem_id,)
+        ).fetchone()
+        problem_title = str(problem_row["title"] if problem_row else "").strip()
+        problem_title_key = problem_title.lower()
 
         # =====================================================
         # SAVE USER CODE
@@ -5535,6 +5571,14 @@ def submit_solution():
             expected_answers.get(problem_id, "")
         ).strip()
 
+        # Prefer the actual problem title when available. This prevents a
+        # stale numeric mapping from breaking a problem after the database
+        # order changes.
+        if "two sum" in problem_title_key:
+            expected_output = "[0, 1]"
+        elif "best time to buy and sell stock" in problem_title_key:
+            expected_output = "5"
+
         # =====================================================
         # DEFAULT EXAMPLE INPUTS
         # =====================================================
@@ -5550,8 +5594,8 @@ def submit_solution():
             # Two Sum
             1: "2 7 11 15\n9\n",
 
-            # Longest Consecutive Sequence
-            2: "100 4 200 1 3 2\n",
+            # Best Time to Buy and Sell Stock
+            2: "7 1 5 3 6 4\n",
 
             # Contains Duplicate
             3: "1 2 3 1\n",
@@ -5609,10 +5653,15 @@ def submit_solution():
         }
 
         if not user_input.strip():
-            user_input = default_inputs.get(
-                problem_id,
-                ""
-            )
+            if "two sum" in problem_title_key:
+                user_input = "2 7 11 15\n9\n"
+            elif "best time to buy and sell stock" in problem_title_key:
+                user_input = "7 1 5 3 6 4\n"
+            else:
+                user_input = default_inputs.get(
+                    problem_id,
+                    ""
+                )
 
         # =====================================================
         # CONTEST MODE
@@ -5710,7 +5759,7 @@ def submit_solution():
                     start_time = datetime.strptime(
                         start_value,
                         "%Y-%m-%d %H:%M:%S"
-                    )
+                    ).replace(tzinfo=now.tzinfo)
                 else:
                     start_time = start_value
 
@@ -5718,7 +5767,7 @@ def submit_solution():
                     end_time = datetime.strptime(
                         end_value,
                         "%Y-%m-%d %H:%M:%S"
-                    )
+                    ).replace(tzinfo=now.tzinfo)
                 else:
                     end_time = end_value
 
@@ -5742,274 +5791,43 @@ def submit_solution():
                 print("CONTEST TIME ERROR:", e)
 
         # =====================================================
-        # TEMP DIRECTORY
+        # EXECUTE USING ONE CROSS-PLATFORM ENGINE
         # =====================================================
-        temp_dir = tempfile.mkdtemp(
-            prefix="codemaster_"
+        # The same execution helper is used by Run and Submit so Python, C,
+        # C++ and Java behave consistently on local Windows and Render Linux.
+        execution = execute_code_for_platform(
+            code=code,
+            language=language,
+            user_input=user_input,
+            timeout=10
         )
 
-        source_file = None
-        executable_file = None
-        run_result = None
+        if not execution.get("success"):
+            status = execution.get("status", "runtime_error")
+            if status == "compiler_unavailable":
+                message = execution.get("error") or "Required compiler is not installed on the server."
+            elif status == "compile_error":
+                message = execution.get("error") or "Compilation failed."
+            else:
+                message = execution.get("error") or "Program execution failed."
 
-        # =====================================================
-        # PYTHON
-        # =====================================================
-        if language == "python":
+            return jsonify({
+                "success": False,
+                "status": status,
+                "correct": False,
+                "message": message,
+                "error": message,
+                "output": execution.get("output", ""),
+                "actual_output": execution.get("output", ""),
+                "expected_output": expected_output
+            }), 200
 
-            source_file = os.path.join(
-                temp_dir,
-                "main.py"
-            )
-
-            with open(
-                source_file,
-                "w",
-                encoding="utf-8"
-            ) as f:
-                f.write(code)
-
-            # -------------------------------------------------
-            # IMPORTANT FIX:
-            # input=user_input prevents EOFError
-            # -------------------------------------------------
-            run_result = subprocess.run(
-                [
-                    sys.executable,
-                    source_file
-                ],
-                input=user_input,
-                cwd=temp_dir,
-                capture_output=True,
-                text=True,
-                timeout=5
-            )
-
-        # =====================================================
-        # C
-        # =====================================================
-        elif language == "c":
-
-            c_base_dir = RUN_FOLDER
-
-            os.makedirs(
-                c_base_dir,
-                exist_ok=True
-            )
-
-            temp_dir = tempfile.mkdtemp(
-                prefix="c_",
-                dir=c_base_dir
-            )
-
-            source_file = os.path.join(
-                temp_dir,
-                "main.c"
-            )
-
-            executable_file = os.path.join(
-                temp_dir,
-                "main.exe"
-            )
-
-            with open(
-                source_file,
-                "w",
-                encoding="utf-8"
-            ) as f:
-                f.write(code)
-
-            compile_result = subprocess.run(
-                [
-                    "gcc",
-                    source_file,
-                    "-o",
-                    executable_file
-                ],
-                cwd=temp_dir,
-                capture_output=True,
-                text=True,
-                timeout=10
-            )
-
-            if compile_result.returncode != 0:
-                return jsonify({
-                    "success": False,
-                    "status": "error",
-                    "message": "C Compilation Error",
-                    "error": compile_result.stderr,
-                    "expected_output": expected_output
-                }), 200
-
-            if not os.path.exists(executable_file):
-                return jsonify({
-                    "success": False,
-                    "status": "error",
-                    "message":
-                        "C executable was not created.",
-                    "expected_output": expected_output
-                }), 200
-
-            run_result = subprocess.run(
-                [
-                    executable_file
-                ],
-                input=user_input,
-                cwd=temp_dir,
-                capture_output=True,
-                text=True,
-                timeout=5
-            )
-
-        # =====================================================
-        # C++
-        # =====================================================
-        elif language == "cpp":
-
-            cpp_base_dir = RUN_FOLDER
-
-            os.makedirs(
-                cpp_base_dir,
-                exist_ok=True
-            )
-
-            temp_dir = tempfile.mkdtemp(
-                prefix="cpp_",
-                dir=cpp_base_dir
-            )
-
-            source_file = os.path.join(
-                temp_dir,
-                "main.cpp"
-            )
-
-            executable_file = os.path.join(
-                temp_dir,
-                "main.exe"
-            )
-
-            with open(
-                source_file,
-                "w",
-                encoding="utf-8"
-            ) as f:
-                f.write(code)
-
-            compile_result = subprocess.run(
-                [
-                    "g++",
-                    source_file,
-                    "-std=c++17",
-                    "-o",
-                    executable_file
-                ],
-                cwd=temp_dir,
-                capture_output=True,
-                text=True,
-                timeout=10
-            )
-
-            if compile_result.returncode != 0:
-                return jsonify({
-                    "success": False,
-                    "status": "error",
-                    "message":
-                        "C++ Compilation Error",
-                    "error":
-                        compile_result.stderr,
-                    "expected_output":
-                        expected_output
-                }), 200
-
-            if not os.path.exists(executable_file):
-                return jsonify({
-                    "success": False,
-                    "status": "error",
-                    "message":
-                        "C++ executable was not created.",
-                    "expected_output":
-                        expected_output
-                }), 200
-
-            run_result = subprocess.run(
-                [
-                    executable_file
-                ],
-                input=user_input,
-                cwd=temp_dir,
-                capture_output=True,
-                text=True,
-                timeout=5
-            )
-
-        # =====================================================
-        # JAVA
-        # =====================================================
-        elif language == "java":
-
-            java_file = os.path.join(
-                temp_dir,
-                "Main.java"
-            )
-
-            with open(
-                java_file,
-                "w",
-                encoding="utf-8"
-            ) as f:
-                f.write(code)
-
-            compile_result = subprocess.run(
-                [
-                    "javac",
-                    "Main.java"
-                ],
-                cwd=temp_dir,
-                capture_output=True,
-                text=True,
-                timeout=10
-            )
-
-            if compile_result.returncode != 0:
-                return jsonify({
-                    "success": False,
-                    "status": "error",
-                    "message":
-                        "Java Compilation Error",
-                    "error":
-                        compile_result.stderr,
-                    "expected_output":
-                        expected_output
-                }), 200
-
-            class_file = os.path.join(
-                temp_dir,
-                "Main.class"
-            )
-
-            if not os.path.exists(class_file):
-                return jsonify({
-                    "success": False,
-                    "status": "error",
-                    "message":
-                        "Main.class was not created.",
-                    "expected_output":
-                        expected_output
-                }), 200
-
-            run_result = subprocess.run(
-                [
-                    "java",
-                    "-cp",
-                    ".",
-                    "Main"
-                ],
-                input=user_input,
-                cwd=temp_dir,
-                capture_output=True,
-                text=True,
-                timeout=5
-            )
+        actual_output = execution.get("output", "")
+        run_result = type("ExecutionResult", (), {
+            "returncode": 0,
+            "stdout": actual_output,
+            "stderr": ""
+        })()
 
         # =====================================================
         # SAFETY CHECK
@@ -6560,6 +6378,7 @@ try:
     print("=" * 60)
 
     create_tables()
+    ensure_user_problem_progress_table()
     ensure_contest_table()
     create_contest_tables()
     ensure_contest_registration_table()
