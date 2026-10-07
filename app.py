@@ -952,7 +952,6 @@ def contests():
     ensure_contest_table()
     create_contest_tables()
     ensure_contest_display_set()
-    refresh_contest_status()
 
     status_filter = request.args.get("status", "").strip().lower()
 
@@ -1022,7 +1021,6 @@ def api_contests():
     ensure_contest_table()
     create_contest_tables()
     ensure_contest_display_set()
-    refresh_contest_status()
 
     conn = get_db_connection()
 
@@ -6372,10 +6370,11 @@ def submit_solution():
 # KEEP THE CONTEST PAGE CONSISTENT ON LOCAL + RENDER
 # ============================================================
 def ensure_contest_display_set():
-    """Ensure the contest page always has exactly 2 LIVE, 2 UPCOMING and 2 FINISHED contests.
+    """Keep exactly 6 public contests: 2 live, 2 upcoming, 2 finished.
 
-    Existing contest rows are reused so registrations/problems are not needlessly lost.
-    Missing rows are created and every contest receives its problem set.
+    This function is intentionally the single source of truth for the contest
+    listing. It also removes extra contest rows that were created by older
+    versions of the application.
     """
     ensure_contest_table()
     create_contest_tables()
@@ -6383,10 +6382,6 @@ def ensure_contest_display_set():
     conn = get_db_connection()
     try:
         now = datetime.now()
-        rows = conn.execute(
-            "SELECT id FROM contests ORDER BY id ASC"
-        ).fetchall()
-        ids = [row["id"] for row in rows]
 
         target_titles = [
             "Weekly Coding Challenge",
@@ -6397,10 +6392,15 @@ def ensure_contest_display_set():
             "Algorithm Contest",
         ]
 
-        # Create enough rows to reach exactly six display contests.
+        # Get existing contests in a stable order.
+        rows = conn.execute(
+            "SELECT id FROM contests ORDER BY id ASC"
+        ).fetchall()
+        ids = [row["id"] for row in rows[:6]]
+
+        # Create missing rows until exactly six are available.
         while len(ids) < 6:
-            idx = len(ids)
-            title = target_titles[idx]
+            title = target_titles[len(ids)]
             cursor = conn.execute(
                 """
                 INSERT INTO contests
@@ -6418,27 +6418,74 @@ def ensure_contest_display_set():
                     0,
                 ),
             )
-            conn.commit()
             ids.append(cursor.lastrowid)
 
-        # Keep the first six contests as the public contest set.
-        ids = ids[:6]
+        # Delete every contest outside the first six. This removes old/extra
+        # contests such as the extra live/finished records from Render.
+        placeholders = ",".join("?" for _ in ids)
+        conn.execute(
+            f"DELETE FROM contests WHERE id NOT IN ({placeholders})",
+            ids,
+        )
+
         schedules = [
-            # 1-2: LIVE
-            ("Weekly Coding Challenge", "Solve problems and climb the leaderboard.", 120,
-             now - timedelta(minutes=30), now + timedelta(hours=1, minutes=30), "live", 1250),
-            ("CodeMaster Weekly Arena", "A fast paced programming contest for CodeMaster users.", 80,
-             now - timedelta(minutes=20), now + timedelta(minutes=40), "live", 980),
-            # 3-4: UPCOMING
-            ("Monthly Challenge", "Solve challenging programming problems in our monthly contest.", 180,
-             now + timedelta(hours=1, minutes=20), now + timedelta(hours=4, minutes=20), "upcoming", 850),
-            ("Data Structures Challenge", "Challenge yourself with arrays, trees, graphs and algorithms.", 150,
-             now + timedelta(hours=4), now + timedelta(hours=6, minutes=30), "upcoming", 540),
-            # 5-6: FINISHED
-            ("Python Speed Challenge", "Solve Python programming challenges against the clock.", 130,
-             now - timedelta(days=2, hours=2), now - timedelta(days=2), "finished", 620),
-            ("Algorithm Contest", "Test your algorithmic thinking and problem solving skills.", 180,
-             now - timedelta(days=1, hours=3), now - timedelta(days=1), "finished", 1600),
+            # 1-2 LIVE
+            (
+                "Weekly Coding Challenge",
+                "Solve problems and climb the leaderboard.",
+                120,
+                now - timedelta(minutes=30),
+                now + timedelta(hours=1, minutes=30),
+                "live",
+                1250,
+            ),
+            (
+                "CodeMaster Weekly Arena",
+                "A fast paced programming contest for CodeMaster users.",
+                80,
+                now - timedelta(minutes=20),
+                now + timedelta(minutes=40),
+                "live",
+                980,
+            ),
+            # 3-4 UPCOMING
+            (
+                "Monthly Challenge",
+                "Solve challenging programming problems in our monthly contest.",
+                180,
+                now + timedelta(hours=1, minutes=20),
+                now + timedelta(hours=4, minutes=20),
+                "upcoming",
+                850,
+            ),
+            (
+                "Data Structures Challenge",
+                "Challenge yourself with arrays, trees, graphs and algorithms.",
+                150,
+                now + timedelta(hours=4),
+                now + timedelta(hours=6, minutes=30),
+                "upcoming",
+                540,
+            ),
+            # 5-6 FINISHED
+            (
+                "Python Speed Challenge",
+                "Solve Python programming challenges against the clock.",
+                130,
+                now - timedelta(days=2, hours=2),
+                now - timedelta(days=2),
+                "finished",
+                620,
+            ),
+            (
+                "Algorithm Contest",
+                "Test your algorithmic thinking and problem solving skills.",
+                180,
+                now - timedelta(days=1, hours=3),
+                now - timedelta(days=1),
+                "finished",
+                1600,
+            ),
         ]
 
         for contest_id, data in zip(ids, schedules):
@@ -6474,9 +6521,25 @@ def ensure_contest_display_set():
     finally:
         conn.close()
 
-    # Every contest must have its five contest problems.
+    # Give every public contest the normal 5-problem contest set.
     for contest_id in ids:
         ensure_contest_problems(contest_id)
+
+
+def get_contest_counts():
+    """Return the exact counts used by the contest page."""
+    conn = get_db_connection()
+    try:
+        rows = conn.execute(
+            "SELECT status, COUNT(*) AS total FROM contests GROUP BY status"
+        ).fetchall()
+        counts = {"live": 0, "upcoming": 0, "finished": 0}
+        for row in rows:
+            if row["status"] in counts:
+                counts[row["status"]] = row["total"]
+        return counts
+    finally:
+        conn.close()
 
 
 # ==========================================
@@ -6500,7 +6563,6 @@ try:
     ensure_contest_registration_table()
     seed_contests()
     ensure_contest_display_set()
-    refresh_contest_status()
 
     print("CodeMaster database initialization completed.")
     print("=" * 60)
@@ -6519,7 +6581,6 @@ if __name__ == "__main__":
     ensure_contest_registration_table()
     seed_contests()
     ensure_contest_display_set()
-    refresh_contest_status()
    
     print("=" * 60)
     print("🚀 CodeMaster Compiler Server Started")
