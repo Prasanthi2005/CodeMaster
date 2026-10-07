@@ -43,6 +43,7 @@ from datetime import datetime
 from database import init_db, seed_problems
 from werkzeug.security import check_password_hash
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 from flask import session
 import smtplib
 import ssl
@@ -420,7 +421,8 @@ def contest_db():
 # ============================================================
 
 def contest_now():
-    return datetime.now()
+    """Return current India time as a naive datetime for contest calculations."""
+    return datetime.now(ZoneInfo("Asia/Kolkata")).replace(tzinfo=None)
 
 
 # ============================================================
@@ -444,7 +446,7 @@ def get_contest_status(start_time, end_time):
             "%Y-%m-%d %H:%M:%S"
         )
 
-        now = datetime.now()
+        now = contest_now()
 
         if now < start:
             return "upcoming"
@@ -565,7 +567,7 @@ def seed_contests():
             return
 
 
-        now = datetime.now()
+        now = contest_now()
 
 
         # =========================================
@@ -757,7 +759,7 @@ def register_for_contest(
         """, (
             contest_id,
             user_id,
-            datetime.now().strftime(
+            contest_now().strftime(
                 "%Y-%m-%d %H:%M:%S"
             )
         ))
@@ -854,7 +856,7 @@ def refresh_contest_status():
 
     try:
 
-        now = datetime.now()
+        now = contest_now()
 
         rows = conn.execute("""
             SELECT
@@ -1859,7 +1861,7 @@ def ensure_live_contests():
     conn = get_db_connection()
 
     try:
-        now = datetime.now()
+        now = contest_now()
         now_text = now.strftime("%Y-%m-%d %H:%M:%S")
 
         live_contests = conn.execute("""
@@ -1911,7 +1913,7 @@ def ensure_upcoming_contest():
 
     conn = get_db_connection()
     try:
-        now = datetime.now()
+        now = contest_now()
         now_text = now.strftime("%Y-%m-%d %H:%M:%S")
 
         row = conn.execute("""
@@ -1973,7 +1975,7 @@ def forgot_password():
         session['reset_email'] = email
         session['reset_otp'] = otp
         session['reset_otp_expiry'] = (
-            datetime.now() + timedelta(seconds=60)
+            contest_now() + timedelta(seconds=60)
         ).strftime('%Y-%m-%d %H:%M:%S')
 
         print('Generated OTP:', otp)
@@ -2016,7 +2018,7 @@ def resend_otp():
 
         session['reset_otp'] = otp
         session['reset_otp_expiry'] = (
-    datetime.now() + timedelta(seconds=60)
+    contest_now() + timedelta(seconds=60)
 ).strftime('%Y-%m-%d %H:%M:%S')
         msg = Message(
             subject='Your New OTP - CodeMaster',
@@ -5063,7 +5065,7 @@ def reset_contests_for_testing():
 
     try:
 
-        now = datetime.now()
+        now = contest_now()
 
 
         contests_data = [
@@ -5699,7 +5701,7 @@ def submit_solution():
             # CONTEST TIME
             # -------------------------------------------------
             try:
-                now = datetime.now()
+                now = contest_now()
 
                 start_value = contest["start_time"]
                 end_value = contest["end_time"]
@@ -6381,7 +6383,7 @@ def ensure_contest_display_set():
 
     conn = get_db_connection()
     try:
-        now = datetime.now()
+        now = contest_now()
 
         target_titles = [
             "Weekly Coding Challenge",
