@@ -951,10 +951,8 @@ def contests():
 
     ensure_contest_table()
     create_contest_tables()
-    refresh_contest_status()
-    ensure_live_contests()
-    ensure_upcoming_contest()
     ensure_contest_display_set()
+    refresh_contest_status()
 
     status_filter = request.args.get("status", "").strip().lower()
 
@@ -986,7 +984,8 @@ def contests():
             ) AS solved_problem_count
 
         FROM contests c
-        WHERE (? = '' OR LOWER(COALESCE(c.status, '')) = ?)
+        WHERE c.id IN (SELECT id FROM contests ORDER BY id ASC LIMIT 6)
+          AND (? = '' OR LOWER(COALESCE(c.status, '')) = ?)
         ORDER BY c.start_time ASC
     """, (status_filter, status_filter))
 
@@ -1022,10 +1021,8 @@ def api_contests():
 
     ensure_contest_table()
     create_contest_tables()
-    refresh_contest_status()
-    ensure_live_contests()
-    ensure_upcoming_contest()
     ensure_contest_display_set()
+    refresh_contest_status()
 
     conn = get_db_connection()
 
@@ -1047,6 +1044,7 @@ def api_contests():
                 COALESCE(participants, 0)
                     AS participants
             FROM contests
+            WHERE id IN (SELECT id FROM contests ORDER BY id ASC LIMIT 6)
             ORDER BY
                 CASE status
                     WHEN 'live' THEN 1
@@ -6374,7 +6372,7 @@ def submit_solution():
 # KEEP THE CONTEST PAGE CONSISTENT ON LOCAL + RENDER
 # ============================================================
 def ensure_contest_display_set():
-    """Ensure the contest page always has 3 LIVE, 2 UPCOMING and 1 FINISHED contests.
+    """Ensure the contest page always has exactly 2 LIVE, 2 UPCOMING and 2 FINISHED contests.
 
     Existing contest rows are reused so registrations/problems are not needlessly lost.
     Missing rows are created and every contest receives its problem set.
@@ -6393,9 +6391,9 @@ def ensure_contest_display_set():
         target_titles = [
             "Weekly Coding Challenge",
             "CodeMaster Weekly Arena",
-            "Python Speed Challenge",
             "Monthly Challenge",
             "Data Structures Challenge",
+            "Python Speed Challenge",
             "Algorithm Contest",
         ]
 
@@ -6426,19 +6424,19 @@ def ensure_contest_display_set():
         # Keep the first six contests as the public contest set.
         ids = ids[:6]
         schedules = [
-            # 1-3: LIVE
+            # 1-2: LIVE
             ("Weekly Coding Challenge", "Solve problems and climb the leaderboard.", 120,
              now - timedelta(minutes=30), now + timedelta(hours=1, minutes=30), "live", 1250),
             ("CodeMaster Weekly Arena", "A fast paced programming contest for CodeMaster users.", 80,
-             now - timedelta(minutes=20), now + timedelta(minutes=20), "live", 980),
-            ("Python Speed Challenge", "Solve Python programming challenges against the clock.", 130,
-             now - timedelta(minutes=10), now + timedelta(hours=1, minutes=20), "live", 620),
-            # 4-5: UPCOMING
+             now - timedelta(minutes=20), now + timedelta(minutes=40), "live", 980),
+            # 3-4: UPCOMING
             ("Monthly Challenge", "Solve challenging programming problems in our monthly contest.", 180,
              now + timedelta(hours=1, minutes=20), now + timedelta(hours=4, minutes=20), "upcoming", 850),
             ("Data Structures Challenge", "Challenge yourself with arrays, trees, graphs and algorithms.", 150,
              now + timedelta(hours=4), now + timedelta(hours=6, minutes=30), "upcoming", 540),
-            # 6: FINISHED
+            # 5-6: FINISHED
+            ("Python Speed Challenge", "Solve Python programming challenges against the clock.", 130,
+             now - timedelta(days=2, hours=2), now - timedelta(days=2), "finished", 620),
             ("Algorithm Contest", "Test your algorithmic thinking and problem solving skills.", 180,
              now - timedelta(days=1, hours=3), now - timedelta(days=1), "finished", 1600),
         ]
@@ -6501,10 +6499,8 @@ try:
     create_contest_tables()
     ensure_contest_registration_table()
     seed_contests()
-    refresh_contest_status()
-    ensure_live_contests()
-    ensure_upcoming_contest()
     ensure_contest_display_set()
+    refresh_contest_status()
 
     print("CodeMaster database initialization completed.")
     print("=" * 60)
@@ -6522,10 +6518,8 @@ if __name__ == "__main__":
     create_contest_tables()
     ensure_contest_registration_table()
     seed_contests()
-    refresh_contest_status()
-    ensure_live_contests()
-    ensure_upcoming_contest()
     ensure_contest_display_set()
+    refresh_contest_status()
    
     print("=" * 60)
     print("🚀 CodeMaster Compiler Server Started")
