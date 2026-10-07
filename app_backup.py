@@ -454,6 +454,63 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
+
+
+def ensure_live_contests():
+
+    conn = get_db_connection()
+
+    try:
+        now = datetime.now()
+
+        live_contests = conn.execute("""
+            SELECT id
+            FROM contests
+            WHERE status = 'live'
+            AND datetime(start_time) <= datetime(?)
+            AND datetime(end_time) >= datetime(?)
+        """, (
+            now.strftime("%Y-%m-%d %H:%M:%S"),
+            now.strftime("%Y-%m-%d %H:%M:%S")
+        )).fetchall()
+
+        if live_contests:
+            return
+
+        conn.execute("""
+            INSERT INTO contests
+            (
+                title,
+                name,
+                description,
+                duration,
+                start_time,
+                end_time,
+                status,
+                participants
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            "Weekly Coding Challenge",
+            "Weekly Coding Challenge",
+            "Compete, solve problems and climb the leaderboard.",
+            120,
+            (
+                now - timedelta(minutes=10)
+            ).strftime("%Y-%m-%d %H:%M:%S"),
+            (
+                now + timedelta(hours=2)
+            ).strftime("%Y-%m-%d %H:%M:%S"),
+            "live",
+            0
+        ))
+
+        conn.commit()
+
+    finally:
+        conn.close()
+
+
 # ============================================================
 # CALCULATE REAL USER RATING
 # ============================================================
@@ -1467,16 +1524,19 @@ def login():
 
     except sqlite3.Error as e:
 
-        print(
-            "LOGIN DATABASE ERROR:",
-            e
-        )
+        conn.rollback()
 
+        print("========================================")
+        print("REGISTER DATABASE ERROR")
+        print("ERROR:", repr(e))
+        print("========================================")
 
         flash(
-            "Unable to connect to database. Please try again.",
+            "Registration failed: " + str(e),
             "error"
         )
+
+        return redirect(url_for("register"))
 
 
         return redirect(
@@ -1686,17 +1746,21 @@ def register():
 
             conn.rollback()
 
-            print("========================================")
-            print("REGISTER DATABASE ERROR")
-            print("ERROR:", repr(e))
-            print("========================================")
+            print(
+                "REGISTER DATABASE ERROR:",
+                e
+            )
+
 
             flash(
-                "Registration failed: " + str(e),
+                "Registration failed. Please try again.",
                 "error"
             )
 
-            return redirect(url_for("register"))
+
+            return redirect(
+                url_for("register")
+            )
 
 
         finally:
@@ -1705,59 +1769,7 @@ def register():
 
 
     return render_template("register.html")
-def ensure_live_contests():
 
-    conn = get_db_connection()
-
-    try:
-        now = datetime.now()
-
-        live_contests = conn.execute("""
-            SELECT id
-            FROM contests
-            WHERE status = 'live'
-            AND datetime(start_time) <= datetime(?)
-            AND datetime(end_time) >= datetime(?)
-        """, (
-            now.strftime("%Y-%m-%d %H:%M:%S"),
-            now.strftime("%Y-%m-%d %H:%M:%S")
-        )).fetchall()
-
-        if live_contests:
-            return
-
-        conn.execute("""
-            INSERT INTO contests
-            (
-                title,
-                name,
-                description,
-                duration,
-                start_time,
-                end_time,
-                status,
-                participants
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            "Weekly Coding Challenge",
-            "Weekly Coding Challenge",
-            "Compete, solve problems and climb the leaderboard.",
-            120,
-            (
-                now - timedelta(minutes=10)
-            ).strftime("%Y-%m-%d %H:%M:%S"),
-            (
-                now + timedelta(hours=2)
-            ).strftime("%Y-%m-%d %H:%M:%S"),
-            "live",
-            0
-        ))
-
-        conn.commit()
-
-    finally:
-        conn.close()
 @app.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
 
@@ -2048,7 +2060,7 @@ def api_run_code():
                     input=user_input,
                     text=True,
                     capture_output=True,
-                    timeout=10
+                    timeout=5
                 )
 
             elif language == "java":
@@ -6703,7 +6715,7 @@ if __name__ == "__main__":
     reset_contests_for_testing()
     ensure_live_contests()
     refresh_contest_status()
-   
+    
     print("=" * 60)
     print("🚀 CodeMaster Compiler Server Started")
     print("=" * 60)
