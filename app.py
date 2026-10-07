@@ -6563,6 +6563,8 @@ try:
     ensure_contest_registration_table()
     seed_contests()
     ensure_contest_display_set()
+    print("FINAL CONTEST COUNTS:", get_contest_counts())
+    print("Expected contest counts: 2 LIVE + 2 UPCOMING + 2 FINISHED")
 
     print("CodeMaster database initialization completed.")
     print("=" * 60)
@@ -6581,6 +6583,7 @@ if __name__ == "__main__":
     ensure_contest_registration_table()
     seed_contests()
     ensure_contest_display_set()
+    print("FINAL CONTEST COUNTS:", get_contest_counts())
    
     print("=" * 60)
     print("🚀 CodeMaster Compiler Server Started")
