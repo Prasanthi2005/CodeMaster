@@ -953,6 +953,9 @@ def contests():
     create_contest_tables()
     refresh_contest_status()
     ensure_live_contests()
+    ensure_upcoming_contest()
+
+    status_filter = request.args.get("status", "").strip().lower()
 
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
@@ -982,8 +985,9 @@ def contests():
             ) AS solved_problem_count
 
         FROM contests c
+        WHERE (? = '' OR LOWER(COALESCE(c.status, '')) = ?)
         ORDER BY c.start_time ASC
-    """)
+    """, (status_filter, status_filter))
 
     rows = cursor.fetchall()
 
@@ -998,6 +1002,20 @@ def contests():
         "contest.html",
         contests=contests_data
     )
+@app.route("/contests/live")
+def live_contests_page():
+    if not session.get("logged_in"):
+        return redirect(url_for("login"))
+    return redirect(url_for("contests", status="live"))
+
+
+@app.route("/contests/upcoming")
+def upcoming_contests_page():
+    if not session.get("logged_in"):
+        return redirect(url_for("login"))
+    return redirect(url_for("contests", status="upcoming"))
+
+
 @app.route("/api/contests", methods=["GET"])
 def api_contests():
 
@@ -1005,6 +1023,7 @@ def api_contests():
     create_contest_tables()
     refresh_contest_status()
     ensure_live_contests()
+    ensure_upcoming_contest()
 
     conn = get_db_connection()
 
@@ -1882,6 +1901,56 @@ def ensure_live_contests():
         for contest_id in contest_ids:
             ensure_contest_problems(contest_id)
 
+    finally:
+        conn.close()
+
+
+def ensure_upcoming_contest():
+    """Keep at least one future/upcoming contest available on Render."""
+    ensure_contest_table()
+    create_contest_tables()
+    refresh_contest_status()
+
+    conn = get_db_connection()
+    try:
+        now = datetime.now()
+        now_text = now.strftime("%Y-%m-%d %H:%M:%S")
+
+        row = conn.execute("""
+            SELECT id
+            FROM contests
+            WHERE datetime(start_time) > datetime(?)
+              AND datetime(end_time) > datetime(?)
+              AND status = 'upcoming'
+            ORDER BY datetime(start_time) ASC
+            LIMIT 1
+        """, (now_text, now_text)).fetchone()
+
+        if row:
+            contest_ids = [row["id"]]
+        else:
+            start_time = now + timedelta(hours=2)
+            end_time = start_time + timedelta(hours=3)
+
+            cursor = conn.execute("""
+                INSERT INTO contests
+                (title, name, description, duration, start_time, end_time, status, participants)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                "CodeMaster Upcoming Challenge",
+                "CodeMaster Upcoming Challenge",
+                "Get ready for the next CodeMaster coding contest.",
+                180,
+                start_time.strftime("%Y-%m-%d %H:%M:%S"),
+                end_time.strftime("%Y-%m-%d %H:%M:%S"),
+                "upcoming",
+                0
+            ))
+            conn.commit()
+            contest_ids = [cursor.lastrowid]
+
+        for contest_id in contest_ids:
+            ensure_contest_problems(contest_id)
     finally:
         conn.close()
 
@@ -6321,6 +6390,7 @@ try:
     seed_contests()
     refresh_contest_status()
     ensure_live_contests()
+    ensure_upcoming_contest()
 
     print("CodeMaster database initialization completed.")
     print("=" * 60)
@@ -6340,6 +6410,7 @@ if __name__ == "__main__":
     seed_contests()
     refresh_contest_status()
     ensure_live_contests()
+    ensure_upcoming_contest()
    
     print("=" * 60)
     print("🚀 CodeMaster Compiler Server Started")
@@ -6355,4 +6426,3 @@ if __name__ == "__main__":
         threaded=True,
         use_reloader=False
     )
-
